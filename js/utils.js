@@ -515,12 +515,31 @@ window.CT = window.CT || {};
   Mus.toggle = function () { Mus.off = !Mus.off; Mus.refresh(); return !Mus.off; };
   // primeiro gesto do jogador libera o áudio (política de autoplay dos navegadores)
   // (chamada síncrona: alguns navegadores exigem o play() dentro do próprio gesto)
+  /* iPhone/iPad e alguns navegadores só deixam tocar depois um áudio que já
+   * foi iniciado dentro de um toque. No primeiro gesto, cada faixa toca muda
+   * por um instante e pausa: assim a música do menu pode começar sozinha
+   * quando a abertura termina. */
+  const liberadas = new Set();
+  function liberarFaixas() {
+    Object.keys((CT.CONFIG && CT.CONFIG.musicas) || {}).forEach((name) => {
+      const t = track(name);
+      if (!t || liberadas.has(name) || !t.el.paused) return;
+      liberadas.add(name);
+      const el = t.el, mudo = el.muted;
+      el.muted = true;
+      const p = el.play();
+      const fim = () => { if (Mus.current !== name || !Mus.audible()) { el.pause(); el.currentTime = 0; } el.muted = mudo; };
+      if (p && p.then) p.then(fim, () => { liberadas.delete(name); el.muted = mudo; }); else fim();
+    });
+  }
   const unlock = (e) => {
     if (e.target && e.target.closest && e.target.closest("#title-music")) return; // o próprio botão decide
+    // dedo encostando ainda não libera o som (só ao soltar)
+    if (!(e.type === "pointerdown" && e.pointerType !== "mouse")) liberarFaixas();
     const t = Mus.current && Mus.tracks[Mus.current];
     if (!t || t.el.paused) tryPlay();
   };
-  window.addEventListener("pointerdown", unlock, true);
-  window.addEventListener("keydown", unlock, true);
+  // (no celular o som só é liberado ao soltar o dedo: pointerup/touchend/click)
+  ["pointerdown", "pointerup", "touchend", "click", "keydown"].forEach((t) => window.addEventListener(t, unlock, true));
   document.addEventListener("visibilitychange", () => Mus.refresh());
 })();

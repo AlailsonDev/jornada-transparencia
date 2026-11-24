@@ -28,7 +28,7 @@ window.CT = window.CT || {};
   let state = "inicio", timer = 0;
 
   function start() {
-    if (state !== "inicio" && state !== "espera") return;
+    if (state !== "inicio" && state !== "espera" && state !== "tentando") return;
     state = "tocando";
     gate.hidden = true;
     el.classList.add("play");
@@ -54,7 +54,7 @@ window.CT = window.CT || {};
       state = "fim"; I.ativa = false;
       el.remove();
       window.removeEventListener("keydown", onKey, true);
-      window.removeEventListener("pointerdown", onPointer, true);
+      GESTOS.forEach((t) => window.removeEventListener(t, onPointer, true));
       const b = document.getElementById("btn-start"); if (b) b.focus({ preventScroll: true });
       resolveDone();
     }, fast ? 380 : 750);
@@ -69,11 +69,17 @@ window.CT = window.CT || {};
   } else start();
 
   // gestos: o primeiro libera o som; ESPAÇO pula; nada passa para o menu por baixo
+  // (no celular, o navegador só libera o som quando o dedo SAI da tela: pointerup/touchend)
   function fromGesture() {
     if (state !== "espera") return false;
+    state = "tentando";
     audio.currentTime = 0;
-    const q = audio.play(); if (q && q.catch) q.catch(() => {});
-    start();
+    const q = audio.play();
+    if (q && q.then) q.then(start, (e) => {
+      if (e && e.name === "NotAllowedError") state = "espera"; // gesto não aceito: espera o próximo
+      else start(); // arquivo indisponível: abertura sem som
+    });
+    else start();
     return true;
   }
   function onKey(e) {
@@ -83,9 +89,12 @@ window.CT = window.CT || {};
   }
   function onPointer(e) {
     if (state === "fim") return;
-    fromGesture();
-    e.preventDefault(); e.stopImmediatePropagation();
+    // mouse libera o som ao apertar; toque, só ao soltar o dedo
+    if (e.type !== "pointerdown" || e.pointerType === "mouse") fromGesture();
+    if (e.cancelable) e.preventDefault();
+    e.stopImmediatePropagation();
   }
+  const GESTOS = ["pointerdown", "pointerup", "touchend", "click"];
   window.addEventListener("keydown", onKey, true);
-  window.addEventListener("pointerdown", onPointer, true);
+  GESTOS.forEach((t) => window.addEventListener(t, onPointer, true));
 })();

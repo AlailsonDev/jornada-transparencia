@@ -616,11 +616,12 @@ body.touch #prompt { white-space: normal; text-align: center; justify-content: c
     position: fixed; inset: 0; z-index: 2000; display: grid; place-content: center; justify-items: center; gap: 18px; padding: 32px; text-align: center;
     background: var(--navy); color: var(--ink);
   }
-  #rotate svg { width: 84px; height: 84px; color: var(--amber); animation: tc-rotate 2.4s ease-in-out infinite; }
+  #rotate svg { width: 96px; height: 96px; color: var(--amber); overflow: visible; }
+  #rotate .rot-phone { transform-box: fill-box; transform-origin: center; animation: tc-rotate 2.4s ease-in-out infinite; }
   #rotate p { margin: 0; color: var(--ink-soft); line-height: 1.5; }
   #rotate b { display: block; font: 800 1.5rem var(--f-display); color: var(--ink); }
 }
-@keyframes tc-rotate { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+@keyframes tc-rotate { 0%, 25% { transform: rotate(0); } 55%, 85% { transform: rotate(90deg); } 100% { transform: rotate(90deg); opacity: 0; } }
 
 /* telas baixas (celular na horizontal): painéis mais compactos */
 @media (max-height: 520px) {
@@ -680,13 +681,15 @@ body.touch #prompt { white-space: normal; text-align: center; justify-content: c
   .menu-btn:hover, .menu-btn:focus-visible { transform: none; }
 
   /* tela inicial: título à esquerda, menu à direita */
+  /* fundo escuro também atrás do menu (à direita), para os botões ficarem legíveis sobre a cidade */
+  #title-screen { background: linear-gradient(90deg, rgba(9, 22, 46, 0.9) 0%, rgba(9, 22, 46, 0.72) 55%, rgba(9, 22, 46, 0.82) 100%); }
   #title-screen { grid-template-columns: minmax(0, 1fr); padding: 52px max(20px, env(safe-area-inset-right, 0px)) 14px max(20px, env(safe-area-inset-left, 0px)); }
   .title-card { max-width: 920px; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(230px, 320px); column-gap: clamp(20px, 4vw, 48px); row-gap: 10px; align-items: center; }
   .title-card > * { grid-column: 1; }
-  .title-kicker { grid-row: 1; font-size: 0.66rem; padding: 4px 10px 4px 8px; white-space: nowrap; max-width: 100%; }
+  .title-kicker { grid-row: 1; justify-self: start; font-size: 0.66rem; padding: 4px 10px 4px 8px; white-space: nowrap; max-width: 100%; }
   .game-title { grid-row: 2; font-size: clamp(1.9rem, min(5.4vw, 10vh), 3.2rem); }
   .title-lead { grid-row: 3; font-size: 0.9rem; line-height: 1.45; }
-  .title-logos { grid-row: 4; padding: 6px 10px; gap: 8px; }
+  .title-logos { grid-row: 4; justify-self: start; padding: 6px 10px; gap: 8px; } /* só a largura dos logos */
   .title-logos img { height: 20px; }
   .title-logos img.logo-cgm { height: 17px; }
   .title-logos img.logo-ctrl-lab { height: 24px; }
