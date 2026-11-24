@@ -227,7 +227,9 @@
   <script src="js/casa-festas.js"></script> <!-- área secreta: Casa de Festas -->
   <script src="js/world.js"></script>     <!-- cidade, prédios, portões, chefe -->
   <script src="js/interiors.js"></script> <!-- ambientes internos -->
-  <script src="js/ranking.js"></script>   <!-- ranking das partidas (guardado no navegador) -->
+  <script src="vendor/firebase-app-compat.js"></script>       <!-- Firebase 12.18 (ranking compartilhado) -->
+  <script src="vendor/firebase-firestore-compat.js"></script> <!-- Firestore: banco do ranking online -->
+  <script src="js/ranking.js"></script>   <!-- ranking das partidas (online no Firebase ou no navegador) -->
   <script src="js/ui.js"></script>        <!-- interface e diálogos -->
   <script src="js/game.js"></script>      <!-- lógica principal -->
 </body>

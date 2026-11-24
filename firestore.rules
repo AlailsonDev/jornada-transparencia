@@ -1,0 +1,40 @@
+rules_version = '2';
+
+// Regras do ranking compartilhado da Jornada da Transparência.
+// Cole este arquivo inteiro em: Console do Firebase → Firestore Database → Regras → Publicar.
+//
+// - Qualquer pessoa com o jogo aberto pode LER o ranking.
+// - Qualquer pessoa pode REGISTRAR uma partida, desde que os dados sejam
+//   plausíveis (até 200 pontos por pergunta, nome com até 24 letras etc.).
+// - Ninguém altera nem apaga partidas pelo jogo. Para limpar, use o console
+//   do Firebase ou troque o nome da coleção em js/data.js (rankingOnline.colecao).
+// - Só são aceitas coleções cujo nome começa com "ranking".
+//
+// Se a pontuação máxima por pergunta mudar em js/data.js
+// (pontosPorAcerto + bonusRapidez.maximo = 200 hoje), ajuste o 200 abaixo.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function partidaValida(d, id) {
+      return d.keys().hasOnly(['id', 'nome', 'pontos', 'acertos', 'perguntas', 'tempo', 'resultado', 'faseInicial', 'personagem', 'data'])
+        && d.keys().hasAll(['id', 'nome', 'pontos', 'acertos', 'perguntas', 'tempo', 'resultado', 'faseInicial', 'personagem', 'data'])
+        && d.id == id
+        && d.nome is string && d.nome.size() >= 1 && d.nome.size() <= 24
+        && d.perguntas is int && d.perguntas >= 1 && d.perguntas <= 30
+        && d.acertos is int && d.acertos >= 0 && d.acertos <= d.perguntas
+        && d.pontos is int && d.pontos >= 0 && d.pontos <= d.acertos * 200
+        && d.tempo is int && d.tempo >= 0 && d.tempo <= 86400
+        && d.resultado in ['vitoria', 'desistiu', 'sem-coracoes']
+        && d.faseInicial is int && d.faseInicial >= 0 && d.faseInicial <= 20
+        && d.personagem is string && d.personagem.size() <= 24
+        && d.data is string && d.data.size() <= 40;
+    }
+
+    match /{colecao}/{id} {
+      allow read: if colecao.matches('ranking.*');
+      allow create: if colecao.matches('ranking.*') && partidaValida(request.resource.data, id);
+      allow update, delete: if false;
+    }
+  }
+}

@@ -483,6 +483,7 @@ window.CT = window.CT || {};
   };
   UI.showEnd = function (tipo, st, h) {
     const v = $("victory"), R = CT.Ranking;
+    fimAtual = null;
     const kicker = tipo === "vitoria" ? "Jornada concluída" : "Partida encerrada";
     const title = tipo === "vitoria" ? (st.genero === "f" && CT.FINAL.tituloFeminino ? CT.FINAL.tituloFeminino : CT.FINAL.titulo) : CT.ENCERRADA.titulo;
     const msg = tipo === "vitoria" ? CT.FINAL.mensagem : CT.ENCERRADA.mensagem;
@@ -523,9 +524,8 @@ window.CT = window.CT || {};
       if (nome.replace(/[^\p{L}\p{N}]/gu, "").length < 2) { $("rank-err").hidden = false; input.focus(); CT.Audio.play("locked"); return; }
       const res = h.registrar(nome);
       CT.Audio.play("correct");
-      $("end-rank").innerHTML = `<p class="rank-pos">${esc(nome)}, você ficou em <b>${res.posicao}º lugar</b> entre ${res.total} ${res.total === 1 ? "partida registrada" : "partidas registradas"}.</p>
-        ${UI.rankingTable(res.lista, { destaque: res.registro.id, limite: 10 })}
-        ${R.persistente ? "" : '<small class="rank-note">Atenção: este navegador não permite guardar dados; o ranking será perdido ao fechar o jogo.</small>'}`;
+      fimAtual = { nome, id: res.registro.id };
+      renderEndRank();
       $("end-actions").hidden = false;
       $("btn-replay").onclick = h.replay;
       if ($("btn-explore")) $("btn-explore").onclick = h.explore;
@@ -534,6 +534,23 @@ window.CT = window.CT || {};
     };
     setTimeout(() => input.focus(), 400);
   };
+  /* posição do jogador e top 10 (redesenhado quando o ranking online muda) */
+  let fimAtual = null;
+  function renderEndRank() {
+    const box = $("end-rank");
+    if (!fimAtual || !box || $("victory").hidden) return;
+    const R = CT.Ranking, ON = R.online, res = R.resultado(fimAtual.id);
+    const pos = res.posicao
+      ? `${esc(fimAtual.nome)}, você está em <b>${res.posicao}º lugar</b> entre ${res.total} ${res.total === 1 ? "partida registrada" : "partidas registradas"}${ON.ativo ? " por todos os jogadores" : ""}.`
+      : `${esc(fimAtual.nome)}, sua partida foi registrada.`;
+    let nota = "";
+    if (ON.ativo && R.pendente(fimAtual.id)) nota = ON.aoVivo ? "Enviando sua pontuação para o ranking geral…" : "Sem conexão com a internet: sua pontuação foi guardada e será enviada ao ranking geral assim que a conexão voltar.";
+    else if (ON.ativo && ON.erro === "permission-denied") nota = "Não foi possível enviar sua pontuação ao ranking geral (envio recusado pelo servidor). Ela ficou guardada neste aparelho.";
+    else if (!ON.ativo && !R.persistente) nota = "Atenção: este navegador não permite guardar dados; o ranking será perdido ao fechar o jogo.";
+    box.innerHTML = `<p class="rank-pos">${pos}</p>
+      ${UI.rankingTable(res.lista, { destaque: fimAtual.id, limite: 10 })}
+      ${nota ? `<small class="rank-note">${esc(nota)}</small>` : ""}`;
+  }
   // compatibilidade: tela de vitória antiga
   UI.showVictory = function (st, h) { UI.showEnd("vitoria", st, h); };
 
@@ -560,10 +577,25 @@ window.CT = window.CT || {};
   };
   /* janela do ranking (menu principal) */
   UI.renderRanking = function () {
-    const R = CT.Ranking, lista = R.lista(), cfg = CT.CONFIG, br = cfg.bonusRapidez || {};
-    $("ranking-meta").innerHTML = `<b>${lista.length}</b> ${lista.length === 1 ? "partida registrada" : "partidas registradas"} neste computador. Cada resposta certa vale <b>${cfg.pontosPorAcerto}</b> pontos + até <b>${br.maximo || 0}</b> de bônus de rapidez. Empate: mais acertos e, depois, menor tempo.`;
+    const R = CT.Ranking, ON = R.online, lista = R.lista(), cfg = CT.CONFIG, br = cfg.bonusRapidez || {};
+    const qtd = `<b>${lista.length}</b> ${lista.length === 1 ? "partida registrada" : "partidas registradas"}`;
+    let onde = `${qtd} neste computador.`;
+    if (ON.ativo) {
+      const st = ON.aoVivo ? '<span class="rank-live on">● ao vivo</span>'
+        : ON.lista ? '<span class="rank-live off">● sem conexão: mostrando o último ranking recebido</span>'
+        : '<span class="rank-live off">● conectando…</span>';
+      onde = `${st} ${qtd} por todos os jogadores.`;
+    }
+    $("ranking-meta").innerHTML = `${onde} Cada resposta certa vale <b>${cfg.pontosPorAcerto}</b> pontos + até <b>${br.maximo || 0}</b> de bônus de rapidez. Empate: mais acertos e, depois, menor tempo.`;
     $("ranking-body").innerHTML = UI.rankingTable(lista, { limite: 100, data: true });
+    // o ranking online só pode ser apagado pelo console do Firebase
+    $("rank-clear").hidden = ON.ativo;
     $("rank-clear").disabled = !lista.length; $("rank-export").disabled = !lista.length;
+  };
+  // ranking online: redesenha o que estiver na tela quando chega uma atualização
+  CT.Ranking.onchange = function () {
+    if (!$("ranking").hidden) UI.renderRanking();
+    renderEndRank();
   };
   UI.hideVictory = function () { $("victory").hidden = true; $("victory").className = ""; };
 

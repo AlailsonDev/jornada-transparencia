@@ -84,6 +84,23 @@ CT.CONFIG = {
   pontosPorAcerto: 100,
   bonusRapidez: { maximo: 100, carencia: 5, perdaPorSegundo: 3 },
 
+  // RANKING COMPARTILHADO (Firebase Firestore)
+  // Com os dados do projeto Firebase preenchidos, todos os aparelhos (PC,
+  // celular, tablet) gravam e leem o mesmo ranking, atualizado ao vivo.
+  // Deixe apiKey vazio para usar o ranking só neste navegador, como antes.
+  // colecao: nome da lista no Firestore; precisa começar com "ranking".
+  // Troque o nome (ex.: "ranking-teste" → "ranking-evento") para começar
+  // um ranking novo, sem as partidas de teste.
+  rankingOnline: {
+    firebase: {
+      apiKey: "AIzaSyC9DN0_LcyuuSJbYoC-aBy_UdeMQXCccFQ",
+      authDomain: "jornada-transparencia.firebaseapp.com",
+      projectId: "jornada-transparencia",
+      appId: "1:467174166175:web:4a4b40ea114da350129caa",
+    },
+    colecao: "ranking-evento",
+  },
+
   velocidadeCaminhada: 7.5,  // unidades por segundo
   velocidadeCorrida: 13,     // com SHIFT pressionado
   velocidadeGiro: 2.7,       // radianos por segundo

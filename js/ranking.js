@@ -1,10 +1,15 @@
 /* =====================================================================
  * RANKING — registra cada partida (nome, pontos, acertos, tempo...)
  *
- * Os registros ficam guardados no próprio navegador do computador onde o
- * jogo roda (localStorage). Assim, num totem ou computador do evento,
- * todas as partidas jogadas ali entram no mesmo ranking, mesmo sem
- * internet e mesmo depois de fechar e abrir o jogo de novo.
+ * Dois modos:
+ *  - ONLINE (CT.CONFIG.rankingOnline preenchido): o ranking fica no
+ *    Firebase Firestore e é o mesmo em todos os aparelhos, atualizado ao
+ *    vivo. Sem internet, a partida fica na fila e é enviada quando a
+ *    conexão voltar (mesmo que o jogo seja fechado e aberto de novo).
+ *  - LOCAL (sem configuração ou sem o Firebase): os registros ficam no
+ *    navegador deste computador (localStorage), como num totem.
+ * Nos dois modos, cada partida também é guardada no navegador, como cópia
+ * de segurança.
  *
  * Ordem do ranking: mais pontos → mais acertos → menor tempo → quem
  * jogou primeiro.
@@ -15,6 +20,81 @@
   const R = { persistente: true };
   CT.Ranking = R;
   let mem = null;
+
+  /* ---------- modo online ---------- */
+  // ativo: Firebase configurado e carregado · lista: último ranking recebido
+  // (null até chegar o primeiro) · aoVivo: conectado ao servidor agora ·
+  // pendentes: ids enviados e ainda não confirmados pelo servidor
+  const ON = { ativo: false, lista: null, aoVivo: false, pendentes: new Set(), erro: "" };
+  R.online = ON;
+  R.onchange = null; // a interface redesenha o ranking quando algo muda
+  const avisar = () => { if (typeof R.onchange === "function") try { R.onchange(); } catch (e) { /* interface */ } };
+  let col = null;
+  const CAMPOS = ["id", "nome", "pontos", "acertos", "perguntas", "tempo", "resultado", "faseInicial", "personagem", "data"];
+
+  /** registro vindo de fora (servidor ou navegador): só os campos esperados, nos tipos certos */
+  function normal(d, id) {
+    if (!d || typeof d.pontos !== "number") return null;
+    return {
+      id: String(d.id || id || "").slice(0, 40),
+      nome: R.limparNome(d.nome) || "Anônimo",
+      pontos: Math.max(0, Math.round(d.pontos)),
+      acertos: d.acertos | 0, perguntas: d.perguntas | 0,
+      tempo: Math.max(0, Math.round(+d.tempo || 0)),
+      resultado: String(d.resultado || "vitoria").slice(0, 20),
+      faseInicial: d.faseInicial | 0,
+      personagem: String(d.personagem || "").slice(0, 24),
+      data: String(d.data || "").slice(0, 40),
+    };
+  }
+  function iniciarOnline() {
+    const cfg = (CT.CONFIG && CT.CONFIG.rankingOnline) || {}, fb = cfg.firebase || {};
+    if (!fb.apiKey || !fb.projectId) return;
+    if (!window.firebase || !firebase.firestore) { console.warn("Ranking online: Firebase não carregou; usando o ranking local."); return; }
+    try {
+      const app = firebase.initializeApp(fb, "ranking");
+      const db = firebase.firestore(app);
+      // fila de envio que sobrevive a fechar o jogo sem internet
+      db.enablePersistence({ synchronizeTabs: true }).catch(() => { /* navegador sem IndexedDB: a fila fica só na memória */ });
+      col = db.collection(cfg.colecao || "ranking");
+      ON.ativo = true;
+      col.onSnapshot({ includeMetadataChanges: true }, (snap) => {
+        ON.lista = snap.docs.map((d) => normal(d.data(), d.id)).filter(Boolean);
+        ON.aoVivo = !snap.metadata.fromCache;
+        ON.pendentes = new Set(snap.docs.filter((d) => d.metadata.hasPendingWrites).map((d) => d.id));
+        if (ON.aoVivo) { ON.erro = ""; reenviarPendentes(); }
+        avisar();
+      }, (err) => {
+        console.warn("Ranking online:", err);
+        ON.erro = err && err.code || "erro"; ON.aoVivo = false;
+        avisar();
+      });
+    } catch (e) {
+      console.warn("Ranking online indisponível:", e);
+      ON.ativo = false; col = null;
+    }
+  }
+  function enviar(e) {
+    const doc = {};
+    CAMPOS.forEach((k) => (doc[k] = e[k]));
+    ON.pendentes.add(e.id); tentados.add(e.id);
+    col.doc(e.id).set(doc)
+      .then(() => { e.pendente = false; save(); })
+      .catch((err) => { console.warn("Ranking online: envio recusado", err); ON.erro = err && err.code || "erro"; avisar(); });
+  }
+  /* partidas feitas no modo online que o servidor ainda não tem (ex.: o jogo
+   * foi fechado sem internet e sem a fila do navegador) */
+  const tentados = new Set(); // uma tentativa por partida a cada abertura do jogo (um envio recusado não entra em laço)
+  function reenviarPendentes() {
+    const tem = new Set(ON.lista.map((e) => e.id));
+    load().forEach((e) => {
+      if (!e.pendente) return;
+      if (tem.has(e.id)) { if (!ON.pendentes.has(e.id)) { e.pendente = false; save(); } }
+      else if (!ON.pendentes.has(e.id) && !tentados.has(e.id)) enviar(e);
+    });
+  }
+  /** a partida ainda não chegou ao servidor? */
+  R.pendente = (id) => ON.ativo && ON.pendentes.has(id);
 
   function load() {
     if (mem) return mem;
@@ -48,16 +128,34 @@
       personagem: String(dados.personagem || "").slice(0, 24),
       data: new Date().toISOString(),
     };
+    if (ON.ativo) e.pendente = true;
     mem.push(e);
     if (mem.length > MAX) mem.splice(0, mem.length - MAX);
     save();
-    const lista = R.lista();
-    return { registro: e, posicao: lista.findIndex((x) => x.id === e.id) + 1, total: lista.length, lista };
+    if (ON.ativo) {
+      enviar(e);
+      // aparece na hora, mesmo antes de o servidor confirmar
+      if (ON.lista && !ON.lista.some((x) => x.id === e.id)) ON.lista.push(normal(e));
+    }
+    return R.resultado(e.id);
   };
-  /** todos os registros, já ordenados */
-  R.lista = () => load().slice().sort(cmp);
-  R.total = () => load().length;
-  R.limpar = function () { mem = []; save(); };
+  /** posição de uma partida no ranking atual */
+  R.resultado = function (id) {
+    const lista = R.lista(), i = lista.findIndex((x) => x.id === id);
+    const registro = i >= 0 ? lista[i] : load().find((x) => x.id === id);
+    return { registro, posicao: i + 1, total: lista.length, lista };
+  };
+  /** todos os registros, já ordenados (no modo online: os de todos os aparelhos) */
+  R.lista = () => {
+    if (!ON.ativo) return load().slice().sort(cmp);
+    const l = (ON.lista || []).slice();
+    // antes de o ranking chegar do servidor, ao menos as partidas deste aparelho
+    if (!ON.lista) load().forEach((e) => { if (e.pendente) l.push(normal(e)); });
+    return l.sort(cmp);
+  };
+  R.total = () => R.lista().length;
+  /** apaga o ranking deste navegador (o online só pelo console do Firebase) */
+  R.limpar = function () { if (ON.ativo) return; mem = []; save(); };
 
   R.tempoTexto = function (s) {
     s = Math.max(0, Math.round(s || 0));
@@ -100,4 +198,6 @@
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   };
+
+  iniciarOnline();
 })();

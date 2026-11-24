@@ -499,6 +499,9 @@ body.boss-fight #hud, body.boss-fight #toast { display: none; }
 .ranking-card { width: min(900px, 100%); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); display: flex; flex-direction: column; }
 .ranking-meta { margin: -6px 0 14px; color: var(--ink-soft); font-size: 0.92rem; line-height: 1.5; }
 .ranking-meta b { color: var(--ink); }
+.rank-live { font-weight: 700; margin-right: 4px; white-space: nowrap; }
+.rank-live.on { color: var(--green); }
+.rank-live.off { color: var(--amber); }
 .ranking-body { min-height: 0; overflow-y: auto; border-radius: var(--r-m); }
 .ranking-body .rank-wrap { overflow: visible; }
 .ranking-tools { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; flex-wrap: wrap; }

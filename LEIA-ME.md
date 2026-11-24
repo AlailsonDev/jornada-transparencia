@@ -66,8 +66,10 @@ Os textos de Seu Lima, das estações 1 a 7, do Corrupson e da tela final seguem
 - **Fim da partida:** ao vencer ou ao encerrar pelo menu (ESC → SAIR DO JOGO), aparece a tela de resultado com pontos, acertos e tempo. O jogador **digita o nome** e a partida entra no ranking. Depois aparecem a posição dele e os 10 primeiros colocados.
 - Se o jogador sair pelo menu **sem ter respondido nenhuma pergunta**, nada é registrado e o jogo volta direto à tela inicial.
 - **Ranking:** no menu principal, **RANKING** mostra as partidas registradas, ordenadas por pontos, depois acertos, depois menor tempo. Cada linha mostra o resultado (Venceu ou Encerrou) e indica se a partida começou por uma fase escolhida em SELECIONAR FASE.
-- **Onde o ranking fica guardado:** no navegador do próprio computador (armazenamento local), sem internet e sem servidor. Ele continua lá depois de fechar e abrir o jogo, desde que seja o **mesmo computador e o mesmo navegador**. Uma janela anônima ou a limpeza dos dados de navegação apaga o ranking.
-- **Exportar e limpar:** na tela do ranking, **EXPORTAR PLANILHA (CSV)** baixa todas as partidas num arquivo que abre no Excel ou no LibreOffice (bom para premiar os vencedores ou guardar o histórico). **LIMPAR RANKING** apaga tudo; é preciso clicar duas vezes para confirmar.
+- **Onde o ranking fica guardado:** há dois modos.
+  - **Compartilhado (Firebase):** com o projeto Firebase configurado (veja **Ranking compartilhado** abaixo), todos os aparelhos (PC, celular, tablet) gravam e leem o mesmo ranking, atualizado ao vivo. A janela do ranking mostra "● ao vivo" quando está conectada. Se a internet cair, a partida fica guardada no aparelho e é enviada sozinha quando a conexão voltar, mesmo que o jogo seja fechado.
+  - **Local:** sem a configuração do Firebase, o ranking fica no navegador do próprio computador, sem internet e sem servidor. Ele continua lá depois de fechar e abrir o jogo, desde que seja o **mesmo computador e o mesmo navegador**. Uma janela anônima ou a limpeza dos dados de navegação apaga o ranking.
+- **Exportar e limpar:** na tela do ranking, **EXPORTAR PLANILHA (CSV)** baixa todas as partidas num arquivo que abre no Excel ou no LibreOffice (bom para premiar os vencedores ou guardar o histórico). No modo local, **LIMPAR RANKING** apaga tudo; é preciso clicar duas vezes para confirmar. No modo compartilhado esse botão não aparece (senão qualquer jogador apagaria o ranking de todos): veja abaixo como começar um ranking novo.
 - Para mudar os valores, edite `pontosPorAcerto` e `bonusRapidez` em `CT.CONFIG` (`js/data.js`). O texto da tela de partida encerrada fica em `CT.ENCERRADA`.
 
 ### Batalha contra o Corrupson
@@ -335,10 +337,27 @@ jornada-transparencia/
     ├── atmosphere.js   tempo, estações, clima, chuva, noite
     ├── world.js        cidade, prédios, portões e torre do chefe final
     ├── interiors.js    ambientes internos de cada prédio
-    ├── ranking.js      ranking das partidas (guardado no navegador)
+    ├── ranking.js      ranking das partidas (Firebase ou navegador)
     ├── ui.js           painel, minimapa, diálogos e tela de vitória
     └── game.js         lógica do jogo: estados, progressão, câmera
 ```
+
+## Ranking compartilhado (Firebase)
+
+Configuração feita uma vez, em uns 10 minutos, com uma conta Google. O plano gratuito (Spark) atende com folga e não pede cartão.
+
+1. Acesse <https://console.firebase.google.com>, clique em **Criar um projeto**, dê um nome (ex.: `jornada-transparencia`) e conclua. O Google Analytics pode ficar desativado.
+2. No menu **Criação → Firestore Database**, clique em **Criar banco de dados**. Escolha a região `southamerica-east1 (São Paulo)` e o **modo de produção**.
+3. Na aba **Regras** do Firestore, apague o conteúdo, cole o arquivo [`firestore.rules`](firestore.rules) inteiro e clique em **Publicar**. As regras deixam qualquer jogador ler o ranking e registrar partidas com dados plausíveis, mas ninguém altera nem apaga nada pelo jogo.
+4. Na página inicial do projeto, clique no ícone **Web** (`</>`) para registrar um app (nome livre; não marque Hosting). Aparece um bloco `firebaseConfig`.
+5. Copie `apiKey`, `authDomain`, `projectId` e `appId` desse bloco para `rankingOnline.firebase` em `js/data.js` e publique o jogo de novo no GitHub Pages.
+
+A `apiKey` do Firebase não é uma senha: ela só identifica o projeto e pode ficar no código público. Quem protege os dados são as regras do passo 3.
+
+- **Testes e dia do evento:** o nome da lista fica em `rankingOnline.colecao` (hoje `ranking-evento`). Para testar sem sujar o ranking do evento, use `ranking-teste` e, antes do evento, volte para `ranking-evento` (ou use outro nome começando com `ranking`). Cada nome é um ranking separado.
+- **Apagar partidas:** pelo console do Firebase, em **Firestore Database → Dados**, apague uma partida ou a coleção inteira.
+- **Abrindo o `index.html` direto do computador:** o ranking compartilhado também funciona, desde que haja internet. Sem internet, a partida fica guardada e é enviada depois.
+- Se o Firebase não carregar ou não estiver configurado, o jogo usa o ranking local automaticamente.
 
 ## Dicas para o evento
 
@@ -348,7 +367,7 @@ jornada-transparencia/
 - **Mouse e ponteiro:** na cidade e dentro dos prédios, o ponteiro do mouse fica escondido e preso à tela. Mover o mouse para os lados gira a personagem e a câmera acompanha por trás; mover para cima ou para baixo inclina o olhar: dá para olhar livremente para o céu (a câmera desce atrás da personagem e a vista fica livre para o alto) ou para o chão. Dentro dos prédios a câmera funciona igual (livre, com zoom na roda do mouse e C para recentrar), sem atravessar as paredes nem o teto da sala. Ele volta a aparecer nos diálogos, no mapa e nas telas com botões. Se a câmera não responder ao mouse, clique uma vez na tela do jogo. A tecla ESC também solta o ponteiro; isso é padrão do navegador. A sensibilidade fica em `CT.CONFIG.sensibilidadeMouse`.
 - **Passos:** os passos da protagonista acompanham a animação, pela altura dos pés. O som muda conforme o piso: asfalto, calçada, grama, chão interno com leve eco, ou respingos quando a rua está molhada.
 - **Reiniciar para o próximo participante:** depois de registrar o nome, clique em **JOGAR NOVAMENTE** ou **TELA INICIAL**. No meio da partida, aperte **ESC → SAIR DO JOGO**; o jogo pede confirmação e leva à tela de resultado para registrar o nome. Recarregar a página (F5) também reinicia, mas a partida em andamento não é registrada.
-- **Ranking no totem:** use sempre o mesmo computador e o mesmo navegador, fora da janela anônima. Ao fim do evento, exporte a planilha pelo botão **EXPORTAR PLANILHA (CSV)** antes de limpar o ranking.
+- **Ranking:** com o ranking compartilhado, confira antes do evento se a janela do ranking mostra "● ao vivo" em cada aparelho. No modo local, use sempre o mesmo computador e o mesmo navegador, fora da janela anônima. Ao fim do evento, exporte a planilha pelo botão **EXPORTAR PLANILHA (CSV)**.
 - **Atalhos para a equipe** (abra o console do navegador com F12):
   - `CT.debug.concluirProximo()` conclui a etapa atual e abre o portão;
   - `CT.debug.irPara(3)` leva o personagem até a porta do prédio 4 (a contagem começa em 0; `irPara(8)` leva ao chefe final).
