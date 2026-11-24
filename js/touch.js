@@ -85,13 +85,23 @@
     actLabel.textContent = label || "PULAR";
   };
 
-  // botões: respondem no toque (sem esperar o "click", que atrasa no celular)
+  /* Botões: respondem assim que o dedo encosta (sem esperar o "click").
+   * Ao soltar o dedo, o navegador ainda manda um "click" naquele ponto, que
+   * cairia na janela recém-aberta (ex.: o diálogo do personagem, que cobre o
+   * botão) e a acionaria. Esse click extra é descartado. */
+  let ultimoBotao = 0;
+  window.addEventListener("click", (e) => {
+    if (performance.now() - ultimoBotao < 500) { e.preventDefault(); e.stopPropagation(); ultimoBotao = 0; }
+  }, true);
   function botao(el, fn) {
     el.addEventListener("pointerdown", (e) => {
       e.preventDefault(); e.stopPropagation();
       el.classList.add("down");
+      ultimoBotao = performance.now();
       fn();
     });
+    // sem click/mouse de compatibilidade depois do toque
+    el.addEventListener("touchend", (e) => { if (e.cancelable) e.preventDefault(); }, { passive: false });
     const up = () => el.classList.remove("down");
     el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up); el.addEventListener("pointerleave", up);
   }
