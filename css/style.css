@@ -60,14 +60,14 @@ button:focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
 /* ---------- TELA INICIAL ---------- */
 #title-screen {
   position: fixed; inset: 0; z-index: 40;
-  display: grid; grid-template-columns: minmax(0, 600px); align-items: center;
+  display: grid; grid-template-columns: minmax(0, 600px); align-items: start; overflow-y: auto;
   padding-left: max(6vw, env(safe-area-inset-left, 0px)); padding-right: max(4vw, env(safe-area-inset-right, 0px));
   padding-block: 5vh;
   background:
     radial-gradient(ellipse 60% 80% at 0% 50%, rgba(9, 22, 46, 0.96) 0%, rgba(9, 22, 46, 0.82) 45%, rgba(9, 22, 46, 0) 100%),
     linear-gradient(180deg, rgba(9, 22, 46, 0) 70%, rgba(9, 22, 46, 0.55) 100%);
 }
-.title-card { display: flex; flex-direction: column; gap: clamp(12px, 2.1vh, 20px); max-width: 540px; animation: title-in 0.7s cubic-bezier(.2,.8,.2,1) both; }
+.title-card { display: flex; flex-direction: column; gap: clamp(12px, 2.1vh, 20px); max-width: 540px; margin-block: auto; /* centraliza; se não couber, começa do topo */ animation: title-in 0.7s cubic-bezier(.2,.8,.2,1) both; }
 @keyframes title-in { from { opacity: 0; transform: translateY(14px); } }
 .org-line { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); }
 .org-line svg { width: 42px; height: 42px; }
@@ -153,8 +153,8 @@ button:focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
 
 
 /* janelas (Como jogar, Créditos, Pausa) */
-.modal { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; padding-block: 4vh; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: rgba(6, 14, 30, 0.62); backdrop-filter: blur(5px); overflow-y: auto; }
-.modal-card { width: min(980px, 100%); padding: 26px 28px; border-radius: 20px; background: rgba(13, 29, 58, 0.94); border: 1px solid var(--glass-line); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45); animation: rise-c 0.3s cubic-bezier(.2,.9,.3,1.1); }
+.modal { position: fixed; inset: 0; z-index: 45; display: flex; padding-block: 4vh; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: rgba(6, 14, 30, 0.62); backdrop-filter: blur(5px); overflow-y: auto; }
+.modal-card { width: min(980px, 100%); margin: auto; /* centraliza; se não couber, rola a partir do topo */ padding: 26px 28px; border-radius: 20px; background: rgba(13, 29, 58, 0.94); border: 1px solid var(--glass-line); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45); animation: rise-c 0.3s cubic-bezier(.2,.9,.3,1.1); }
 @keyframes rise-c { from { transform: translateY(18px); opacity: 0; } }
 .modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
 .modal-card h2 { margin: 2px 0 0; font-family: var(--f-display); font-size: 2rem; line-height: 1.05; }
@@ -263,9 +263,9 @@ button:focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
 
 
 /* ---------- ESCOLHA DE PERSONAGEM ---------- */
-#charselect { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; padding: 4vh max(24px, 4vw); pointer-events: none;
+#charselect { position: fixed; inset: 0; z-index: 30; display: flex; align-items: flex-start; overflow-y: auto; padding: 4vh max(24px, 4vw); pointer-events: none;
   background: linear-gradient(90deg, rgba(9, 22, 46, 0.82) 0%, rgba(9, 22, 46, 0.45) 42%, rgba(9, 22, 46, 0) 62%); }
-.cs-panel { pointer-events: auto; width: min(580px, 100%); padding: 28px 28px 22px; border-radius: var(--r-l); display: grid; gap: 18px; animation: rise-side-l 0.4s cubic-bezier(.2,.9,.3,1.1); }
+.cs-panel { pointer-events: auto; margin-block: auto; width: min(580px, 100%); padding: 28px 28px 22px; border-radius: var(--r-l); display: grid; gap: 18px; animation: rise-side-l 0.4s cubic-bezier(.2,.9,.3,1.1); }
 @keyframes rise-side-l { from { transform: translateX(-24px); opacity: 0; } }
 .cs-kicker { font: 800 0.74rem/1 var(--f-body); letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); }
 #cs-title { margin: -8px 0 0; font: 800 clamp(1.7rem, 3.2vw, 2.3rem)/1.1 var(--f-display); }
@@ -287,8 +287,8 @@ button:focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
 .cs-actions .btn-primary { flex: 1; }
 .cs-hint { font-size: 0.8rem; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 @media (max-width: 900px) {
-  #charselect { align-items: flex-end; padding: 16px; background: linear-gradient(0deg, rgba(9, 22, 46, 0.9) 0%, rgba(9, 22, 46, 0.4) 50%, rgba(9, 22, 46, 0) 70%); }
-  .cs-panel { padding: 18px; gap: 12px; }
+  #charselect { padding: 16px; background: linear-gradient(0deg, rgba(9, 22, 46, 0.9) 0%, rgba(9, 22, 46, 0.4) 50%, rgba(9, 22, 46, 0) 70%); }
+  .cs-panel { padding: 18px; gap: 12px; margin-top: auto; margin-bottom: 0; }
   .cs-info { min-height: 0; }
   .cs-hint { display: none; }
 }
@@ -432,11 +432,11 @@ body.boss-fight #hud, body.boss-fight #toast { display: none; }
 /* ---------- VITÓRIA ---------- */
 #victory {
   position: fixed; inset: 0; z-index: 38; overflow-y: auto;
-  display: grid; place-items: center; padding-block: 4vh;
+  display: flex; padding-block: 4vh;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   background: radial-gradient(ellipse at 50% 20%, rgba(30, 111, 217, 0.55), rgba(9, 22, 46, 0.94) 65%);
 }
-.victory-card { width: min(780px, 100%); text-align: center; display: grid; gap: 20px; justify-items: center; }
+.victory-card { width: min(780px, 100%); margin: auto; text-align: center; display: grid; gap: 20px; justify-items: center; }
 .seal { width: 120px; height: 120px; animation: spin-in 1s cubic-bezier(.2,.9,.3,1.3); }
 @keyframes spin-in { from { transform: scale(0) rotate(-180deg); } }
 .victory-kicker { font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: var(--amber); font-size: 0.9rem; }
@@ -658,7 +658,7 @@ body.touch #prompt { white-space: normal; text-align: center; justify-content: c
   .feedback .badge { width: 30px; height: 30px; font-size: 1rem; }
 
   #boss-bar { top: 6px; padding: 8px 12px 10px; }
-  #victory { place-items: start center; padding-block: 16px; }
+  #victory { padding-block: 12px; }
   .victory-card { gap: 12px; }
   .seal { width: 72px; height: 72px; }
   #bigmap canvas { width: min(76vh, 86vw); height: min(76vh, 86vw); }
@@ -666,3 +666,94 @@ body.touch #prompt { white-space: normal; text-align: center; justify-content: c
   #bigmap .legend { flex-wrap: wrap; justify-content: center; }
 }
 @media (max-height: 520px) and (max-width: 560px) { .options { grid-template-columns: 1fr; } }
+
+/* =====================================================================
+ * TELAS BAIXAS NA HORIZONTAL (celular deitado, janelas baixas)
+ * Menu inicial e pausa em duas colunas; tudo mais compacto para caber
+ * sem rolar. Se ainda assim não couber, a tela rola (nada fica cortado).
+ * ===================================================================== */
+@media (max-height: 560px) and (orientation: landscape) {
+  .menu-list { gap: 6px; }
+  .menu-btn { padding: 9px 14px; font-size: 0.9rem; gap: 10px; border-radius: 12px; }
+  .menu-btn svg { width: 18px; height: 18px; }
+  .menu-btn.primary { padding: 11px 16px; font-size: 0.98rem; }
+  .menu-btn:hover, .menu-btn:focus-visible { transform: none; }
+
+  /* tela inicial: título à esquerda, menu à direita */
+  #title-screen { grid-template-columns: minmax(0, 1fr); padding: 52px max(20px, env(safe-area-inset-right, 0px)) 14px max(20px, env(safe-area-inset-left, 0px)); }
+  .title-card { max-width: 920px; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(230px, 320px); column-gap: clamp(20px, 4vw, 48px); row-gap: 10px; align-items: center; }
+  .title-card > * { grid-column: 1; }
+  .title-kicker { grid-row: 1; font-size: 0.66rem; padding: 4px 10px 4px 8px; white-space: nowrap; max-width: 100%; }
+  .game-title { grid-row: 2; font-size: clamp(1.9rem, min(5.4vw, 10vh), 3.2rem); }
+  .title-lead { grid-row: 3; font-size: 0.9rem; line-height: 1.45; }
+  .title-logos { grid-row: 4; padding: 6px 10px; gap: 8px; }
+  .title-logos img { height: 20px; }
+  .title-logos img.logo-cgm { height: 17px; }
+  .title-logos img.logo-ctrl-lab { height: 24px; }
+  .title-menu { grid-column: 2; grid-row: 1 / span 4; margin: 0; width: 100%; }
+  .menu-hint { grid-column: 2; grid-row: 5; }
+  .music-chip { top: max(10px, env(safe-area-inset-top, 0px)); padding: 6px 12px; }
+  .music-chip .music-text { display: none; }
+  .music-chip .music-state { padding-left: 0; border-left: 0; }
+
+  /* janelas: ocupam quase a tela, cabeçalho fixo no topo ao rolar */
+  .modal { padding-block: 8px; }
+  .modal-card { padding: 14px 18px; border-radius: 16px; max-height: calc(100vh - 16px); max-height: calc(100dvh - 16px); overflow-y: auto; }
+  .modal-head { position: sticky; top: -14px; z-index: 2; margin: -14px -18px 10px; padding: 12px 18px 8px; background: rgba(13, 29, 58, 0.98); border-bottom: 1px solid var(--glass-line); }
+  .modal-card h2 { font-size: 1.4rem; }
+  .modal-card h3 { margin: 12px 0 6px; }
+  .modal-card p { font-size: 0.92rem; line-height: 1.5; }
+  .btn-dlg { padding: 8px 16px; font-size: 0.85rem; }
+  .howto-grid { grid-template-columns: 1.1fr 1fr; gap: 20px; }
+  .keys-table { gap: 6px 12px; }
+  .keys-table dd { font-size: 0.86rem; }
+  .howto-steps span { font-size: 0.86rem; }
+  .phases-note { margin: 0 0 10px; font-size: 0.82rem; }
+  .phase-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .menu-btn.phase-card { padding: 7px 10px; gap: 10px; }
+  .phase-card .ph-num { width: 30px; height: 30px; font-size: 0.95rem; border-radius: 9px; }
+  .phase-card .ph-text b { font-size: 0.86rem; }
+  .phase-card .ph-text small { font-size: 0.72rem; }
+  .ranking-card, .credits-card { max-height: calc(100dvh - 16px); }
+  .ranking-meta { margin: 0 0 8px; font-size: 0.82rem; }
+  .ranking-tools { margin-top: 8px; }
+
+  /* pausa: placar à esquerda, opções à direita */
+  .pause-card { width: min(700px, 100%); grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); column-gap: 20px; row-gap: 8px; align-items: start; }
+  .pause-card > * { grid-column: 1; }
+  .pause-card h2 { font-size: 1.6rem; }
+  .pause-stats { grid-template-columns: 1fr; gap: 6px; }
+  .pause-stats div { padding: 7px 10px; display: flex; align-items: baseline; gap: 8px; }
+  .pause-stats b { font-size: 1.1rem; }
+  #pause-menu, #pause-confirm { grid-column: 2; grid-row: 1 / span 4; }
+
+  /* escolha de personagem: painel à esquerda, compacto */
+  #charselect { padding: 10px max(14px, env(safe-area-inset-left, 0px)); background: linear-gradient(90deg, rgba(9, 22, 46, 0.85) 0%, rgba(9, 22, 46, 0.45) 50%, rgba(9, 22, 46, 0) 70%); }
+  .cs-panel { width: min(540px, 64vw); padding: 12px 14px; gap: 8px; margin-block: auto; }
+  .cs-kicker { display: none; }
+  #cs-title { margin: 0; font-size: 1.3rem; }
+  .cs-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+  .cs-card { padding: 5px 4px 6px; gap: 4px; border-radius: 12px; }
+  .cs-portrait { aspect-ratio: 1; border-radius: 8px; }
+  .cs-card-name { font-size: 0.72rem; }
+  .cs-info { padding: 8px 12px; min-height: 0; }
+  .cs-name b { font-size: 1.1rem; }
+  .cs-name span { font-size: 0.8rem; }
+  .cs-desc { font-size: 0.82rem; line-height: 1.4; margin-top: 4px; }
+  .cs-actions .btn-primary { padding: 11px 20px; font-size: 0.95rem; }
+  .cs-actions .btn-ghost { padding: 10px 18px; }
+
+  /* fim de partida */
+  .victory-title { font-size: clamp(1.6rem, 4vw, 2.4rem); }
+  .victory-kicker { font-size: 0.78rem; }
+  .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .stat { padding: 8px; }
+  .victory-msg { font-size: 0.9rem; }
+  .btn-primary { padding: 12px 22px; font-size: 1rem; }
+  .btn-ghost { padding: 11px 20px; }
+}
+/* celular bem pequeno deitado: menu sem o texto de apresentação */
+@media (max-height: 400px) and (orientation: landscape) and (max-width: 720px) {
+  .title-lead { display: none; }
+  .phase-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
