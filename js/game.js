@@ -980,6 +980,13 @@ window.CT = window.CT || {};
     if (!gameCanvas || camCtl.locked || G.paused || !lockAllowed() || !gameCanvas.requestPointerLock) return;
     try { const r = gameCanvas.requestPointerLock(); if (r && r.catch) r.catch(() => {}); } catch (e) { /* navegador recusou */ }
   }
+  /** o ponteiro só fica escondido/preso durante o jogo; em qualquer menu ele volta */
+  const cursorHidden = () => !G.paused && lockAllowed() && !UI.topModal();
+  function syncCursor() {
+    const hide = cursorHidden();
+    if (camCtl.locked && !hide) unlockPointer();
+    document.body.classList.toggle("hide-cursor", hide);
+  }
   let expectedUnlock = false;
   function unlockPointer() {
     if (document.pointerLockElement && document.exitPointerLock) { expectedUnlock = true; document.exitPointerLock(); }
@@ -990,6 +997,8 @@ window.CT = window.CT || {};
     canvas.addEventListener("click", lockPointer);
     document.addEventListener("pointerlockchange", () => {
       camCtl.locked = document.pointerLockElement === canvas;
+      // pedido de trava que chegou atrasado, quando já estamos num menu: solta de novo
+      if (camCtl.locked && !cursorHidden()) { unlockPointer(); return; }
       // o navegador solta o ponteiro quando o jogador aperta ESC: abre o menu
       if (!camCtl.locked && !expectedUnlock && (G.mode === "city" || G.mode === "interior")) openPause();
       expectedUnlock = false;
@@ -1202,8 +1211,8 @@ window.CT = window.CT || {};
   function loop() {
     const raw = clock.getDelta();
     const dt = Math.min(raw, CT.debug.dtMax || 0.05);
+    syncCursor(); // vale para todos os estados, inclusive menu de pausa e tela inicial
     if (G.paused) { // jogo congelado atrás do menu
-      document.body.classList.remove("hide-cursor");
       renderer.render(G.scene === "city" ? world.scene : interiors.scene, camera);
       return;
     }
@@ -1224,8 +1233,6 @@ window.CT = window.CT || {};
 
     // tempo de partida (para o ranking): conta durante o jogo, não no menu de pausa
     if (!G.over && !G.explore && G.mode !== "ended" && G.mode !== "victory") G.playTime += Math.min(raw, 1);
-    if (camCtl.locked && !lockAllowed()) unlockPointer();
-    document.body.classList.toggle("hide-cursor", G.mode === "city" || G.mode === "cutscene" || G.mode === "transition" || (G.mode === "interior" && !UI.dialog.open));
     movePlayer(dt);
 
     if (G.scene === "city") {
