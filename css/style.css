@@ -760,3 +760,13 @@ body.touch #prompt { white-space: normal; text-align: center; justify-content: c
   .title-lead { display: none; }
   .phase-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* mensagem arqueada do CtrlDino (Casa de Festas) */
+#dino-banner { position: fixed; left: 50%; top: 9vh; z-index: 36; width: min(880px, 94vw); transform: translateX(-50%) scale(0.6); opacity: 0; pointer-events: none; text-align: center; transition: opacity 0.35s ease, transform 0.5s cubic-bezier(.2, 1.6, .4, 1); }
+#dino-banner.show { opacity: 1; transform: translateX(-50%) scale(1); }
+#dino-banner svg { width: 100%; height: auto; display: block; overflow: visible; }
+#dino-banner text { font-family: var(--f-display); font-weight: 800; paint-order: stroke; stroke: #0d1d3a; stroke-linejoin: round; }
+#dino-banner .db-l1 { font-size: 50px; fill: #FFD23F; stroke-width: 12px; letter-spacing: 0.5px; }
+#dino-banner .db-l2 { font-size: 46px; fill: #fff; stroke-width: 11px; }
+#dino-banner .db-pts { display: inline-block; margin-top: 2px; padding: 6px 16px; border-radius: 999px; background: #18B26B; color: #fff; font: 800 clamp(0.9rem, 2.2vw, 1.2rem) var(--f-display); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3); }
+@media (max-height: 520px) { #dino-banner { top: 4vh; width: min(640px, 80vw); } }

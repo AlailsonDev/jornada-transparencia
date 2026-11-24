@@ -12,6 +12,7 @@ rules_version = '2';
 //
 // Se a pontuação máxima por pergunta mudar em js/data.js
 // (pontosPorAcerto + bonusRapidez.maximo = 200 hoje), ajuste o 200 abaixo.
+// O "+ 200" é o bônus secreto do CtrlDino (bonusDino: 150 + 50).
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -23,7 +24,7 @@ service cloud.firestore {
         && d.nome is string && d.nome.size() >= 1 && d.nome.size() <= 24
         && d.perguntas is int && d.perguntas >= 1 && d.perguntas <= 30
         && d.acertos is int && d.acertos >= 0 && d.acertos <= d.perguntas
-        && d.pontos is int && d.pontos >= 0 && d.pontos <= d.acertos * 200
+        && d.pontos is int && d.pontos >= 0 && d.pontos <= d.acertos * 200 + 200
         && d.tempo is int && d.tempo >= 0 && d.tempo <= 86400
         && d.resultado in ['vitoria', 'desistiu', 'sem-coracoes']
         && d.faseInicial is int && d.faseInicial >= 0 && d.faseInicial <= 20

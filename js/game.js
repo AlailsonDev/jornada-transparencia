@@ -25,6 +25,7 @@ window.CT = window.CT || {};
     score: 0, completed: [], firstTry: 0, bossDefeated: false, bossHits: 0, shake: 0,
     correct: 0, answered: false, playTime: 0, qTime: {}, startPhase: 0, over: false, // acertos, tempo e fim da partida
     unlocked: 0, statuses: [], current: -1, mapOpen: false, explore: false,
+    dino: { achou: false, dancou: false }, // bônus secreto da Casa de Festas (uma vez por partida)
   };
   const P = { x: 0, z: 0, y: 0, heading: 0, speed: 0, jy: 0, vy: 0 }; // jy/vy: altura e velocidade do pulo
   const cam = { pos: new THREE.Vector3(), look: new THREE.Vector3(), mode: "follow" };
@@ -163,7 +164,7 @@ window.CT = window.CT || {};
 
   /* ---------------- progresso ---------------- */
   function resetProgress() {
-    G.score = 0; G.completed = new Array(N).fill(false); G.firstTry = 0; G.bossDefeated = false; G.bossHits = 0; G.explore = false;
+    G.score = 0; G.dino = { achou: false, dancou: false }; G.completed = new Array(N).fill(false); G.firstTry = 0; G.bossDefeated = false; G.bossHits = 0; G.explore = false;
     G.correct = 0; G.answered = false; G.playTime = 0; G.qTime = {}; G.startPhase = 0; G.over = false;
     UI.setPlaytime(0);
     UI.bossBar.hide(); document.body.classList.remove("boss-fight");
@@ -489,6 +490,17 @@ window.CT = window.CT || {};
     player.dancaBatida = CT.CasaFestas.BEAT; player.dancaTempo = () => room.npc.tempo();
     player.mode = "dance";
     A.play("pop");
+    // primeira dança com o CtrlDino na partida: bônus
+    if (!G.dino.dancou) {
+      G.dino.dancou = true;
+      const pts = bonusDino("dancar");
+      if (pts) { G.score += pts; updateHUD(); UI.toast(`Que passinho! <b>+${pts} pontos</b> por dançar com o CtrlDino!`, "success", 3200); }
+    }
+  }
+  /* pontos do bônus secreto; só valem com a partida em andamento */
+  function bonusDino(tipo) {
+    if (G.over || G.explore) return 0;
+    return ((CFG.bonusDino || {})[tipo]) | 0;
   }
   function nearFesta() { const f = world.casaFestas; return !!f && Math.hypot(P.x - f.trigger.x, P.z - f.trigger.z) < 2.4; }
   function nearBoss() { const t = world.boss.trigger; return !world.boss.defeated && Math.hypot(P.x - t.x, P.z - t.z) < 4.8; }
@@ -618,7 +630,14 @@ window.CT = window.CT || {};
     CT.Music.play("festa", 0.8); // música animada só aqui dentro
     updateHUD();
     await UI.fade(false);
-    UI.toast("Você encontrou uma <b>área secreta</b>: a Casa de Festas!", "success", 3200);
+    if (!G.dino.achou) {
+      // primeira vez na partida: mensagem arqueada e bônus (sair e entrar de novo não conta)
+      G.dino.achou = true;
+      const pts = bonusDino("achar");
+      if (pts) { G.score += pts; updateHUD(); }
+      UI.dinoBanner(pts);
+      A.play("success");
+    }
   }
   async function exitFesta() {
     const f = world.casaFestas;

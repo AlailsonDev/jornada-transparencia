@@ -82,6 +82,9 @@ CT.CONFIG = {
   // O bônus começa em bonusRapidez.maximo e, depois de bonusRapidez.carencia
   // segundos, cai bonusRapidez.perdaPorSegundo pontos a cada segundo.
   pontosPorAcerto: 100,
+  // Bônus secreto da Casa de Festas (uma vez por partida): achar o CtrlDino e dançar com ele.
+  // Se mudar estes valores, ajuste também o limite em firestore.rules.
+  bonusDino: { achar: 150, dancar: 50 },
   bonusRapidez: { maximo: 100, carencia: 5, perdaPorSegundo: 3 },
 
   // RANKING COMPARTILHADO (Firebase Firestore)

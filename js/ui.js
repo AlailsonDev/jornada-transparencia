@@ -604,6 +604,25 @@ window.CT = window.CT || {};
     if (!$("ranking").hidden) UI.renderRanking();
     renderEndRank();
   };
+  /* mensagem arqueada ao achar o CtrlDino pela primeira vez */
+  UI.dinoBanner = function (pts) {
+    let el = $("dino-banner");
+    if (!el) {
+      el = document.createElement("div"); el.id = "dino-banner"; el.setAttribute("role", "status");
+      document.body.appendChild(el);
+    }
+    el.innerHTML = `
+      <svg viewBox="0 0 1000 300" aria-label="Parabéns! Você achou o CtrlDino, o dinossauro festeiro!">
+        <defs><path id="dino-arco" d="M20 250 Q500 -90 980 250"/></defs>
+        <text class="db-l1"><textPath href="#dino-arco" startOffset="50%" text-anchor="middle">Parabéns! Você achou o CtrlDino,</textPath></text>
+        <text class="db-l2" x="500" y="225" text-anchor="middle">o dinossauro festeiro!</text>
+      </svg>
+      ${pts ? `<div class="db-pts">+${pts} pontos de bônus</div>` : ""}`;
+    el.classList.remove("show"); void el.offsetWidth; el.classList.add("show");
+    clearTimeout(UI.dinoBanner.t);
+    UI.dinoBanner.t = setTimeout(() => el.classList.remove("show"), 4800);
+    if (UI.fx) { UI.fx.confetti(90, innerWidth * 0.3, innerHeight * 0.5); UI.fx.confetti(90, innerWidth * 0.7, innerHeight * 0.5); }
+  };
   UI.hideVictory = function () { $("victory").hidden = true; $("victory").className = ""; };
 
   /* =================================================================
