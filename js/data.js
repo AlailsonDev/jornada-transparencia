@@ -505,7 +505,7 @@ CT.MODELOS = {
       cabeca: { abaixoDoTopo: 0.14, frente: 0.1 }, torso: { frente: 0.13, altura: 0.02, costas: 0.16 } },
     guarda: { arquivo: "guarda-lima.glb", altura: 1.74, origem: "Ready Player Me (Babylon.js), adaptado a partir de uma foto",
       cabeca: { abaixoDoTopo: 0.16, frente: 0.1 }, torso: { frente: 0.13, altura: 0.02, costas: 0.16 } },
-    // Helena: Michelle (Mixamo) refeita a partir do desenho: cabelo castanho liso e comprido, sem franja,
+    // Pricylla: Michelle (Mixamo) refeita a partir do desenho: cabelo castanho liso e comprido, sem franja,
     // blusa branca de manga bufante e colar de coração.
     // Lorena (ouvidora, prédio 3): Michelle (Mixamo) refeita a partir do desenho: cabelo preto
     // ondulado e comprido, risca no meio e preso atrás das orelhas, brincos de pérolas e blusa
@@ -582,7 +582,7 @@ CT.PERSONAGENS = [
   { id: "ana", nome: "Ana", genero: "f", papel: "Estudante de jornalismo",
     descricao: "Tranças nagô, argolas douradas e camisa listrada. Quer descobrir para onde vai cada centavo do dinheiro público.",
     modelo: "anaTrancas" },
-  { id: "helena", nome: "Helena", genero: "f", papel: "Professora de história",
+  { id: "helena", nome: "Pricylla", genero: "f", papel: "Professora de história",
     descricao: "Cabelo comprido, sorriso fácil e colar de coração. Apaixonada por arquivos e documentos antigos: acredita que memória e transparência andam juntas.",
     modelo: "helenaCabelo" },
   { id: "caio", nome: "Caio", genero: "m", papel: "Músico e líder comunitário",
@@ -686,7 +686,7 @@ CT.CREDITOS = [
   ]],
   ["Personagens", [
     "Animações e personagens de apoio: Michelle e X Bot · Mixamo/Adobe (uso gratuito, inclusive em projetos institucionais e comerciais)",
-    "Helena: criada a partir de um desenho enviado pela equipe, sobre a Michelle do Mixamo (cabelo, rosto, blusa e colar refeitos para o jogo)",
+    "Pricylla: criada a partir de um desenho enviado pela equipe, sobre a Michelle do Mixamo (cabelo, rosto, blusa e colar refeitos para o jogo)",
     "Lorena, a ouvidora: criada a partir de um desenho enviado pela equipe, sobre a Michelle do Mixamo (cabelo ondulado, rosto, blusa listrada e brincos de pérolas refeitos para o jogo)",
     "Ana: criada a partir de um desenho enviado pela equipe, sobre a Michelle do Mixamo (tranças, rosto, camisa, acessórios e roupas refeitos para o jogo)",
     "Caio: criado a partir de um desenho enviado pela equipe, sobre um avatar Ready Player Me (barba, cabelo, aparelho, camiseta e corrente refeitos para o jogo)",
