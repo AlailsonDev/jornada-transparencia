@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>A Jornada da Transparência</title>
+  <!-- Fontes locais (pasta fonts/) e estilos da interface -->
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- ABERTURA (antes do menu): logo do CRI + "Games Institucionais" sobre fundo branco -->
+  <div id="intro" aria-hidden="true">
+    <div class="intro-mark">
+      <img src="assets/logos/ctrl-lab.png" alt="">
+      <div class="intro-games"><span class="ig-a">Games</span> <span class="ig-b">Institucionais</span></div>
+    </div>
+    <p class="intro-gate" hidden>Clique ou pressione qualquer tecla para começar</p>
+  </div>
+
+  <!-- Tela do jogo (Three.js desenha aqui) -->
+  <canvas id="game"></canvas>
+
+  <!-- TELA INICIAL -->
+  <section id="title-screen" aria-label="Tela inicial">
+    <div class="title-card">
+      <div class="title-kicker" id="title-foot"></div>
+      <h1 class="game-title">A Jornada da <span>Transparência</span></h1>
+      <p class="title-lead" id="title-lead"></p>
+      <nav class="menu-list title-menu" id="title-menu" aria-label="Menu principal">
+        <button class="menu-btn primary" id="btn-start"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg><span class="label-text">CARREGANDO A CIDADE…</span><span class="kbd">ENTER</span></button>
+        <button class="menu-btn" id="btn-phases"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span>SELECIONAR FASE</span></button>
+        <button class="menu-btn" id="btn-ranking"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg><span>RANKING</span></button>
+        <button class="menu-btn" id="btn-howto"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.6 2.6 0 0 1 5 .9c0 1.8-2.6 2.2-2.6 4"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg><span>COMO JOGAR</span></button>
+        <button class="menu-btn" id="btn-credits"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z"/></svg><span>CRÉDITOS</span></button>
+      </nav>
+      <p class="menu-hint"><span class="kbd">↑</span><span class="kbd">↓</span> escolher <span class="dot">·</span> <span class="kbd">ENTER</span> confirmar</p>
+      <div class="title-logos" id="title-logos" aria-label="Realização"></div>
+    </div>
+    <!-- música do menu: mostra a faixa e liga/desliga só a música -->
+    <button class="panel music-chip" id="title-music" aria-pressed="true" hidden>
+      <span class="music-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="music-text"><b id="music-title"></b><small id="music-sub"></small></span>
+      <span class="music-state" id="music-state">MÚSICA LIGADA</span>
+    </button>
+  </section>
+
+  <!-- COMO JOGAR -->
+  <div id="howto" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="howto-title">
+    <div class="modal-card howto-card">
+      <div class="modal-head"><div><div class="label">Tutorial</div><h2 id="howto-title">Como jogar</h2></div><button class="btn-dlg" data-close>VOLTAR <span class="kbd">ESC</span></button></div>
+      <div class="howto-grid">
+        <section>
+          <h3>Objetivo</h3>
+          <p>Percorra a cidade e visite os <b>8 prédios</b> da jornada, na ordem. Em cada um, um servidor conta uma curiosidade sobre transparência pública e faz uma pergunta. Acerte todas e enfrente o <b>Corrupson</b> na Torre da Transparência: cada uma das <b>3 perguntas</b> que você acertar tira um pedaço da vida dele.</p>
+          <h3>Em cada prédio</h3>
+          <ol class="howto-steps">
+            <li><b>Curiosidade</b><span>Leia a explicação do personagem.</span></li>
+            <li><b>Pergunta</b><span>Escolha uma de quatro alternativas (A, B, C ou D).</span></li>
+            <li><b>Resultado</b><span>Acertou: +100 pontos, mais um bônus de até 100 pela rapidez, e a próxima rua se abre. Errou: veja a explicação e tente de novo (o tempo continua correndo).</span></li>
+          </ol>
+          <h3>Pontuação e ranking</h3>
+          <p>O tempo de cada resposta começa quando a caixa com a pergunta aparece: <b>quanto mais rápido acertar, mais pontos</b>. No final, você digita seu nome e a pontuação entra no <b>ranking</b>.</p>
+          <h3>Pela cidade</h3>
+          <p>Siga a <b>seta amarela</b> no chão e o mapa. Portões vermelhos só abrem depois do prédio anterior. A cada etapa o dia avança e o clima muda.</p>
+        </section>
+        <section>
+          <h3>Controles</h3>
+          <dl class="keys-table">
+            <dt><span class="kbd">↑</span><span class="kbd">↓</span></dt><dd>Andar para frente e para trás</dd>
+            <dt><span class="kbd">←</span><span class="kbd">→</span> <span class="kbd">MOUSE</span></dt><dd>Girar a personagem (mova o mouse para os lados, sem clicar). Para cima e para baixo: olhar o céu ou o chão</dd>
+            <dt><span class="kbd">SHIFT</span></dt><dd>Correr</dd>
+            <dt><span class="kbd">ESPAÇO</span></dt><dd>Pular; perto de uma porta ou pessoa: entrar, conversar e avançar</dd>
+            <dt><span class="kbd">A</span><span class="kbd">B</span><span class="kbd">C</span><span class="kbd">D</span></dt><dd>Responder (ou clique)</dd>
+            <dt><span class="kbd">M</span></dt><dd>Mapa da cidade</dd>
+            <dt><span class="kbd">C</span> <span class="kbd">RODA</span></dt><dd>Recentrar e aproximar a câmera</dd>
+            <dt><span class="kbd">ESC</span></dt><dd>Menu: continuar, som ou sair do jogo</dd>
+          </dl>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESCOLHA DE PERSONAGEM (a personagem aparece em 3D ao lado) -->
+  <section id="charselect" hidden aria-labelledby="cs-title">
+    <div class="cs-panel panel">
+      <div class="cs-kicker" id="cs-kicker">Antes de começar</div>
+      <h2 id="cs-title">Escolha sua personagem</h2>
+      <div class="cs-grid" id="cs-grid" role="radiogroup" aria-label="Personagens"></div>
+      <div class="cs-info" aria-live="polite">
+        <div class="cs-name"><b id="cs-name"></b><span id="cs-role"></span></div>
+        <p class="cs-desc" id="cs-desc"></p>
+      </div>
+      <div class="cs-actions">
+        <button class="btn-primary" id="cs-go">COMEÇAR A JORNADA</button>
+        <button class="btn-ghost" id="cs-back">VOLTAR</button>
+      </div>
+      <div class="cs-hint"><span class="kbd">←</span><span class="kbd">→</span> escolher · <span class="kbd">ENTER</span> começar · <span class="kbd">ESC</span> voltar</div>
+    </div>
+  </section>
+
+  <!-- SELEÇÃO DE FASES -->
+  <div id="phases" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="phases-title">
+    <div class="modal-card phases-card">
+      <div class="modal-head"><div><div class="label">Escolha por onde começar</div><h2 id="phases-title">Selecionar fase</h2></div><button class="btn-dlg" data-close>VOLTAR <span class="kbd">ESC</span></button></div>
+      <p class="phases-note">As fases anteriores à escolhida ficam liberadas, mas só as respostas dadas nesta partida somam pontos.</p>
+      <div class="phase-grid" id="phase-grid"></div>
+    </div>
+  </div>
+
+  <!-- RANKING -->
+  <div id="ranking" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="ranking-title">
+    <div class="modal-card ranking-card">
+      <div class="modal-head"><div><div class="label">Todas as partidas registradas</div><h2 id="ranking-title">Ranking</h2></div><button class="btn-dlg" data-close>VOLTAR <span class="kbd">ESC</span></button></div>
+      <p class="ranking-meta" id="ranking-meta"></p>
+      <div class="ranking-body" id="ranking-body"></div>
+      <div class="ranking-tools">
+        <button class="menu-btn small" id="rank-export"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>EXPORTAR PLANILHA (CSV)</span></button>
+        <button class="menu-btn small danger" id="rank-clear"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span>LIMPAR RANKING</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CRÉDITOS -->
+  <div id="credits" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="credits-title">
+    <div class="modal-card credits-card">
+      <div class="modal-head"><div><div class="label">Equipe e licenças</div><h2 id="credits-title">Créditos</h2></div><button class="btn-dlg" data-close>VOLTAR <span class="kbd">ESC</span></button></div>
+      <div class="credits-body" id="credits-body"></div>
+    </div>
+  </div>
+
+  <!-- MENU DE PAUSA (ESC) -->
+  <div id="pause" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="pause-title">
+    <div class="modal-card pause-card">
+      <div class="label">Jogo pausado</div>
+      <h2 id="pause-title">Menu</h2>
+      <div class="pause-stats" id="pause-stats"></div>
+      <nav class="menu-list" id="pause-menu" aria-label="Menu de pausa">
+        <button class="menu-btn primary" data-act="continuar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg><span>CONTINUAR</span><span class="kbd">ESC</span></button>
+        <button class="menu-btn" data-act="howto"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.6 2.6 0 0 1 5 .9c0 1.8-2.6 2.2-2.6 4"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg><span>COMO JOGAR</span></button>
+        <button class="menu-btn" data-act="som"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8a5 5 0 0 1 0 8"/></svg><span id="pause-sound">SOM: LIGADO</span></button>
+        <button class="menu-btn" data-act="musica"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg><span id="pause-music">MÚSICA: LIGADA</span></button>
+        <button class="menu-btn danger" data-act="sair"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h5v16h-5"/><path d="M10 8l-4 4 4 4M6 12h10"/></svg><span>SAIR DO JOGO</span></button>
+      </nav>
+      <div class="pause-confirm" id="pause-confirm" hidden>
+        <p id="pause-confirm-text"><b>Encerrar a partida?</b> Sua pontuação até aqui vai para o ranking.</p>
+        <div class="menu-list confirm-row">
+          <button class="menu-btn danger" data-act="confirmar-sair"><span>SIM, ENCERRAR</span></button>
+          <button class="menu-btn" data-act="cancelar-sair"><span>CANCELAR</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud" hidden>
+    <div class="panel" id="score-panel">
+      <div id="clock" aria-live="polite"></div>
+      <div class="score-row"><span class="label">Pontuação</span><span id="score">0</span></div>
+      <div class="time-row"><span class="label">Tempo de partida</span><span class="playtime" title="Tempo de partida"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/></svg><span id="playtime">00:00</span></span></div>
+      <div>
+        <div class="label" style="margin-bottom:6px">Progresso da jornada</div>
+        <div class="journey" id="journey"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="progress-meta"><span id="done-count"></span><span id="challenge-count"></span></div>
+      <div id="objective"></div>
+    </div>
+    <div class="panel" id="map-panel">
+      <canvas id="minimap" width="420" height="420"></canvas>
+      <div class="legend"><span><i style="background:#6B7385"></i>Bloqueado</span><span><i style="background:#FFB020"></i>Disponível</span><span><i style="background:#18B26B"></i>Concluído</span></div>
+      <div class="map-hint"><span class="kbd">M</span> mapa ampliado</div>
+    </div>
+    <div class="panel" id="help">
+      <span><span class="kbd">↑</span><span class="kbd">↓</span> andar</span>
+      <span><span class="kbd">←</span><span class="kbd">→</span> girar</span>
+      <span><span class="kbd">SHIFT</span> correr</span>
+      <span><span class="kbd">ESPAÇO</span> pular / interagir</span>
+      <span><span class="kbd">ESC</span> menu</span>
+      <span><span class="kbd">MOUSE</span> girar e olhar</span>
+    </div>
+    <div id="prompt" hidden></div>
+    <div id="toast" hidden></div>
+    <button class="panel" id="mute" aria-label="Som ligado/desligado" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg></button>
+  </div>
+
+  <!-- MAPA AMPLIADO -->
+  <div id="bigmap" hidden>
+    <div class="panel">
+      <h2>Mapa da cidade <span class="kbd">M</span></h2>
+      <canvas id="bigmap-canvas" width="900" height="900"></canvas>
+      <div class="legend"><span><i style="background:#6B7385"></i>Bloqueado</span><span><i style="background:#FFB020"></i>Disponível</span><span><i style="background:#18B26B"></i>Concluído</span><span><i style="background:#8E44FF"></i>Desafio final</span><span><i style="background:#E2574C"></i>Portão fechado</span></div>
+    </div>
+  </div>
+
+  <!-- DIÁLOGO, EFEITOS E VITÓRIA -->
+  <!-- barra de vida do chefe -->
+  <div id="boss-bar" hidden>
+    <div class="bb-top">
+      <span class="bb-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+      <div class="bb-names"><b id="bb-name">Corrupson</b><small id="bb-role"></small></div>
+      <span class="bb-count" id="bb-count">3/3</span>
+    </div>
+    <div class="bb-track" id="bb-track" role="progressbar" aria-label="Vida do Corrupson" aria-valuemin="0" aria-valuemax="3" aria-valuenow="3">
+      <div class="bb-trail"></div><div class="bb-fill"></div><div class="bb-segs" id="bb-segs"></div>
+    </div>
+  </div>
+  <div id="hit-flash" aria-hidden="true"></div>
+  <div id="dialog" hidden role="dialog" aria-live="polite"></div>
+  <div id="victory" hidden></div>
+  <div id="fade"></div>
+  <canvas id="fx"></canvas>
+
+  <!-- Bibliotecas e módulos do jogo (ordem importa) -->
+  <script src="vendor/three.min.js"></script>          <!-- Three.js r147 -->
+  <script src="vendor/GLTFLoader.js"></script>         <!-- leitura de modelos .glb -->
+  <script src="vendor/SkeletonUtils.js"></script>      <!-- cópia de personagens com esqueleto -->
+  <script src="js/data.js"></script>      <!-- CONTEÚDO: perguntas, NPCs, textos -->
+  <script src="js/utils.js"></script>     <!-- utilitários, texturas, colisão, som -->
+  <script src="js/intro.js"></script>     <!-- abertura (logo do CRI + efeito sonoro) -->
+  <script src="js/characters.js"></script><!-- personagens (fábricas + substitutos provisórios) -->
+  <script src="js/models.js"></script>    <!-- modelos 3D externos (GLB), animações, objetos -->
+  <script src="js/atmosphere.js"></script><!-- tempo, estações, clima, iluminação noturna -->
+  <script src="assets/logos/js/logos.js"></script><!-- logos dos outdoors (embutidos) -->
+  <script src="assets/texturas/js/texturas.js"></script><!-- texturas recortadas de fotos (embutidas) -->
+  <script src="js/prefeitura.js"></script><!-- prédio 1: sede da Prefeitura do Jaboatão -->
+  <script src="js/ouvidoria.js"></script> <!-- prédio 3: Ouvidoria Geral -->
+  <script src="js/casa-festas.js"></script> <!-- área secreta: Casa de Festas -->
+  <script src="js/world.js"></script>     <!-- cidade, prédios, portões, chefe -->
+  <script src="js/interiors.js"></script> <!-- ambientes internos -->
+  <script src="js/ranking.js"></script>   <!-- ranking das partidas (guardado no navegador) -->
+  <script src="js/ui.js"></script>        <!-- interface e diálogos -->
+  <script src="js/game.js"></script>      <!-- lógica principal -->
+</body>
+</html>

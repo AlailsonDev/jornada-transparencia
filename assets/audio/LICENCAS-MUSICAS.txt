@@ -1,0 +1,39 @@
+MÚSICAS DO JOGO – A JORNADA DA TRANSPARÊNCIA
+=============================================
+
+Todas as músicas são gratuitas e de uso livre, inclusive em uso institucional.
+
+1) menu-16-bit-relationship.mp3 – tela inicial
+   "16-bit Relationship", de Yoshiyuki Tatsuya
+   Arquivo fornecido pela equipe (yoshiyuki_tatsuya-16bit-16-bit-relationship-427979.mp3),
+   no padrão de nomes de download do Pixabay (https://pixabay.com/music/).
+   Licença de Conteúdo Pixabay: uso gratuito, inclusive comercial, sem atribuição obrigatória
+   (https://pixabay.com/service/license-summary/). Não permite revender o arquivo de áudio isolado.
+
+2) jogo-city-sunshine.mp3 – cidade e prédios (fundo)
+   "City Sunshine", de Kevin MacLeod
+   Origem: FreePD.com (acervo de domínio público, 2008–2025)
+   Licença: CC0 1.0 Universal – domínio público
+   (https://creativecommons.org/publicdomain/zero/1.0/deed.pt_BR)
+   SHA-256 do original: e05c1bd683174cff77d492b7ac77262ff4617f99f69d82564b66831cf48352d6
+
+3) chefe-kings-trailer.mp3 – batalha contra o Dr. Sigilo
+   "Kings Trailer", de Rafael Krux
+   Origem: FreePD.com
+   Licença: CC0 1.0 Universal – domínio público
+   SHA-256 do original: 872747c75bd9dcb12134e7d6b4870238eb72c5557753a77232ee22fa1d2fd21a
+
+4) abertura-cri-games.mp3 – abertura (logo do CRI) antes do menu
+   "Intro", de DarioCoiro (efeito sonoro)
+   Arquivo fornecido pela equipe (dariocoiro-intro-530687.mp3), no padrão de nomes de
+   download do Pixabay (https://pixabay.com/sound-effects/).
+   Licença de Conteúdo Pixabay: uso gratuito, inclusive comercial, sem atribuição obrigatória
+   (https://pixabay.com/service/license-summary/). Usado sem alterações.
+
+As faixas do FreePD foram obtidas do acervo https://github.com/SoundSafari/CC0-1.0-Music
+(pasta freepd.com). O site FreePD declarava: "This music is all licensed CC0 1.0
+Universal Public Domain Dedication."
+
+Ajustes feitos para o jogo: silêncio do fim removido, fade-out curto para o loop,
+volume nivelado (cerca de -16 LUFS nas faixas do FreePD) e recodificação em MP3
+(160–192 kbps).

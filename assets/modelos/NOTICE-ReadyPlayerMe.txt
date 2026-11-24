@@ -1,0 +1,28 @@
+AVATARES READY PLAYER ME (Caio, Paulo, Prefeito, Seu Antônio e Seu Lima)
+===============================================================
+
+rpm-homem-a.glb  ← "readyplayer.me.glb", repositório oficial do Three.js
+                   https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf
+rpm-homem-b.glb  ← "rpm.glb", repositório de recursos do Babylon.js
+                   https://github.com/BabylonJS/Assets/tree/master/mixamo/Characters
+senhor-camisa.glb ← gerado a partir de rpm-homem-b.glb e do desenho enviado pela equipe
+                   (ferramentas/personagem-desenho/gerar_senhor.py)
+guarda-lima.glb  ← gerado a partir de rpm-homem-b.glb e da foto enviada pela equipe
+                   (ferramentas/personagem-desenho/gerar_senhor.py guarda)
+paulo.glb        ← gerado a partir de rpm-homem-a.glb e do desenho enviado pela equipe
+                   (ferramentas/personagem-desenho/gerar_paulo.py)
+prefeito.glb     ← gerado a partir de rpm-homem-b.glb e do desenho enviado pela equipe
+                   (ferramentas/personagem-desenho/gerar_senhor.py prefeito)
+caio.glb         ← gerado a partir de rpm-homem-b.glb e do desenho enviado pela equipe
+                   (ferramentas/personagem-desenho/gerar_caio.py)
+
+Licença: os avatares criados no Ready Player Me são disponibilizados sob
+licença Creative Commons 4.0 para uso NÃO COMERCIAL
+(https://docs.readyplayer.me/ready-player-me/support/terms-of-use).
+Este jogo é educativo, gratuito e sem fins comerciais.
+
+Ajustes feitos para o jogo: expressões faciais (morph targets) removidas,
+texturas convertidas para JPEG (até 1024 px). As cores de pele, cabelo e
+roupas são alteradas em tempo real pelo jogo (CT.MODELOS.personagens,
+"tingirTexturas", em js/data.js). No senhor-camisa.glb as cores já vêm
+pintadas na textura pelo script gerador.

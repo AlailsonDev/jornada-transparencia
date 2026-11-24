@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Embutir modelo 3D</title>
+<link rel="stylesheet" href="../css/fonts.css">
+<style>
+  :root { --bg: #0F2242; --card: #16305C; --ink: #F4F7FC; --soft: #B9C7DE; --amber: #FFB020; --line: rgba(160,196,255,.25); }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); font: 16px/1.5 "Figtree", "Segoe UI", Arial, sans-serif; display: grid; place-items: center; padding: 24px 16px; }
+  main { width: min(640px, 100%); display: grid; gap: 18px; }
+  h1 { margin: 0; font: 800 2rem/1.1 "Bricolage Grotesque", "Segoe UI", Arial, sans-serif; }
+  p { margin: 0; color: var(--soft); }
+  ol { margin: 0; padding-left: 1.2em; color: var(--soft); display: grid; gap: 6px; }
+  code { background: rgba(255,255,255,.08); padding: 1px 6px; border-radius: 5px; color: var(--ink); }
+  .drop { border: 2px dashed var(--line); border-radius: 14px; padding: 28px; text-align: center; background: var(--card); cursor: pointer; }
+  .drop:hover, .drop.over { border-color: var(--amber); }
+  input[type=file] { display: none; }
+  #out { display: grid; gap: 10px; }
+  .item { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 10px; background: rgba(255,255,255,.06); border: 1px solid var(--line); }
+  a.btn { color: #1A1300; background: var(--amber); text-decoration: none; font-weight: 800; padding: 8px 14px; border-radius: 999px; white-space: nowrap; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Embutir modelo 3D</h1>
+  <p>Transforma um arquivo <code>.glb</code> no arquivo <code>.js</code> que o jogo carrega quando é aberto direto do computador, sem servidor.</p>
+  <ol>
+    <li>Copie o novo <code>.glb</code> para <code>assets/modelos/originais/</code>.</li>
+    <li>Escolha o mesmo arquivo abaixo e salve o <code>.js</code> gerado em <code>assets/modelos/js/</code>, sem mudar o nome.</li>
+    <li>Se o nome do arquivo for diferente do anterior, atualize-o em <code>js/data.js</code> (<code>CT.MODELOS</code>).</li>
+  </ol>
+  <label class="drop" id="drop" for="file">Clique para escolher ou arraste arquivos <b>.glb</b> aqui</label>
+  <input type="file" id="file" accept=".glb" multiple>
+  <div id="out"></div>
+</main>
+<script>
+  const out = document.getElementById("out"), drop = document.getElementById("drop");
+  function handle(files) {
+    [...files].filter((f) => /\.glb$/i.test(f.name)).forEach((f) => {
+      const r = new FileReader();
+      r.onload = () => {
+        const bytes = new Uint8Array(r.result); let bin = "";
+        for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+        const js = "window.CT_MODELOS_EMBUTIDOS=window.CT_MODELOS_EMBUTIDOS||{};CT_MODELOS_EMBUTIDOS[" + JSON.stringify(f.name) + "]=\"" + btoa(bin) + "\";\n";
+        const url = URL.createObjectURL(new Blob([js], { type: "text/javascript" }));
+        const div = document.createElement("div"); div.className = "item";
+        div.innerHTML = "<span>" + f.name + " → <b>" + f.name + ".js</b> (" + (js.length / 1048576).toFixed(1) + " MB)</span>";
+        const a = document.createElement("a"); a.className = "btn"; a.href = url; a.download = f.name + ".js"; a.textContent = "Salvar .js";
+        div.appendChild(a); out.appendChild(div);
+      };
+      r.readAsArrayBuffer(f);
+    });
+  }
+  document.getElementById("file").onchange = (e) => handle(e.target.files);
+  drop.ondragover = (e) => { e.preventDefault(); drop.classList.add("over"); };
+  drop.ondragleave = () => drop.classList.remove("over");
+  drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove("over"); handle(e.dataTransfer.files); };
+</script>
+</body>
+</html>
