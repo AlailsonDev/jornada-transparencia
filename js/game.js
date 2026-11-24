@@ -50,7 +50,7 @@ window.CT = window.CT || {};
     renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("game"), antialias: true, powerPreference: "high-performance" });
     quality.max = quality.pr = Math.min(window.devicePixelRatio || 1, CFG.pixelRatioMaximo);
     renderer.setPixelRatio(quality.pr);
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight, false); // o CSS mantém o canvas na tela toda
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
@@ -58,6 +58,11 @@ window.CT = window.CT || {};
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 600);
+    // já durante o carregamento: tela cheia e giro do aparelho mudam o tamanho da tela
+    window.addEventListener("resize", onResize);
+    window.addEventListener("orientationchange", () => setTimeout(onResize, 300));
+    document.addEventListener("fullscreenchange", onResize);
+    document.addEventListener("webkitfullscreenchange", onResize);
     // modelos 3D (personagens com esqueleto e objetos urbanos)
     const label = startBtn.querySelector(".label-text");
     try { await CT.Assets.load((p) => { label.textContent = "CARREGANDO MODELOS 3D… " + Math.round(p * 100) + "%"; }); }
@@ -79,7 +84,6 @@ window.CT = window.CT || {};
     arrow = makeArrow();
     world.scene.add(arrow);
 
-    window.addEventListener("resize", onResize);
     window.addEventListener("keydown", onKeyDown);
     setupMouseCamera(renderer.domElement);
     window.addEventListener("keyup", (e) => { keys[e.code] = false; });
@@ -132,13 +136,20 @@ window.CT = window.CT || {};
     let pr = quality.pr;
     if (fps < 40 && pr > quality.min) { quality.teto = pr - 0.01; pr = Math.max(quality.min, pr - 0.2); }
     else if (fps > 56 && pr + 0.1 <= Math.min(quality.max, quality.teto)) pr += 0.1;
-    if (pr !== quality.pr) { quality.pr = pr; renderer.setPixelRatio(pr); renderer.setSize(window.innerWidth, window.innerHeight); }
+    if (pr !== quality.pr) { quality.pr = pr; renderer.setPixelRatio(pr); renderer.setSize(window.innerWidth, window.innerHeight, false); }
   }
 
+  /* Ajusta o canvas ao tamanho da tela. Também é conferido a cada quadro:
+   * no celular o evento "resize" às vezes chega antes de o tamanho novo
+   * valer (ao girar o aparelho, ao entrar/sair da tela cheia). */
+  let telaW = 0, telaH = 0;
   function onResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    const w = window.innerWidth, h = window.innerHeight;
+    if (!w || !h || (w === telaW && h === telaH)) return;
+    telaW = w; telaH = h;
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(w, h, false);
   }
 
   function makeArrow() {
@@ -1258,6 +1269,7 @@ window.CT = window.CT || {};
   function loop() {
     const raw = clock.getDelta();
     const dt = Math.min(raw, CT.debug.dtMax || 0.05);
+    onResize(); // só age se o tamanho da tela mudou
     syncCursor(); // vale para todos os estados, inclusive menu de pausa e tela inicial
     if (G.paused) { // jogo congelado atrás do menu
       renderer.render(G.scene === "city" ? world.scene : interiors.scene, camera);
