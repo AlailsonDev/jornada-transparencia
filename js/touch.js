@@ -196,8 +196,9 @@
   set(T.movel && !(matchMedia("(any-pointer: fine)").matches && matchMedia("(any-hover: hover)").matches));
 
   /* ---------- tela cheia (celular e tablet) ---------- */
-  T.telaCheia = function () {
-    if (!T.ativo || document.fullscreenElement || document.webkitFullscreenElement) return;
+  /** forcar: o gesto já é um toque (ex.: abertura, antes de o modo toque ser detectado) */
+  T.telaCheia = function (forcar) {
+    if ((!T.ativo && !forcar) || document.fullscreenElement || document.webkitFullscreenElement) return;
     const el = document.documentElement;
     const req = el.requestFullscreen || el.webkitRequestFullscreen;
     if (!req) return; // iPhone: só instalando na tela inicial

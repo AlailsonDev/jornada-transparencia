@@ -90,11 +90,18 @@ window.CT = window.CT || {};
   function onPointer(e) {
     if (state === "fim") return;
     // mouse libera o som ao apertar; toque, só ao soltar o dedo
-    if (e.type !== "pointerdown" || e.pointerType === "mouse") fromGesture();
+    if (e.type !== "pointerdown" || e.pointerType === "mouse") {
+      // primeiro o som: o pedido de tela cheia "gasta" a permissão do toque
+      fromGesture();
+      // celular/tablet: o primeiro toque também põe o jogo em tela cheia (e na horizontal)
+      const toque = e.type === "touchend" || (e.type === "pointerup" && e.pointerType !== "mouse");
+      if (toque && !telaCheiaPedida && CT.Touch && CT.Touch.telaCheia) { telaCheiaPedida = true; CT.Touch.telaCheia(true); }
+    }
     if (e.cancelable) e.preventDefault();
     e.stopImmediatePropagation();
   }
   const GESTOS = ["pointerdown", "pointerup", "touchend", "click"];
+  let telaCheiaPedida = false;
   window.addEventListener("keydown", onKey, true);
   GESTOS.forEach((t) => window.addEventListener(t, onPointer, true));
 })();
