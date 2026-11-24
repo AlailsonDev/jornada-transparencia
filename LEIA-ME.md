@@ -36,6 +36,27 @@ Navegadores recomendados: **Google Chrome** ou **Microsoft Edge** atualizados. O
 | Roda do mouse | Aproximar ou afastar a câmera |
 | C | Recentrar a inclinação e o zoom da câmera |
 
+### Celular e tablet (toque)
+
+O jogo funciona no navegador do celular e do tablet, com os mesmos arquivos. A troca de controles é **automática**: ao tocar na tela, os controles de toque aparecem; ao usar teclado ou mouse (por exemplo, um tablet com teclado), eles somem e tudo volta a ser como no PC. Os textos de ajuda, o tutorial **COMO JOGAR** e os avisos na tela acompanham o modo.
+
+| Toque | Ação |
+|---|---|
+| Joystick (metade esquerda da tela) | Arraste o dedo para andar e girar. Empurrado até a borda, corre. O joystick aparece onde o dedo tocar |
+| Arrastar na metade direita | Girar a personagem e olhar para cima ou para baixo |
+| Pinça com dois dedos | Aproximar ou afastar a câmera |
+| Toque duplo na metade direita | Recentrar a câmera |
+| Botão redondo (canto inferior direito) | Pular. Perto de uma porta ou pessoa, ele fica âmbar e vira ENTRAR, CONVERSAR, VOLTAR… O aviso "TOQUE EM ENTRAR" também funciona como botão |
+| Botão ☰ | Menu de pausa (o mesmo do ESC) |
+| Minimapa | Toque para abrir o mapa ampliado |
+| ✕ no diálogo | Fechar o diálogo (o mesmo do ESC) |
+
+- **Na horizontal:** no celular, o jogo pede para girar o aparelho. No tablet funciona nas duas posições.
+- **Tela cheia:** no Android e no iPad, o jogo entra em tela cheia ao começar a partida. No iPhone, o Safari não permite: use **Compartilhar → Adicionar à Tela de Início**; aberto pelo ícone, o jogo ocupa a tela toda. No Android, **Adicionar à tela inicial** faz o mesmo.
+- **Desempenho:** em celulares e tablets o jogo usa as configurações de `celular` em `CT.CONFIG` (`js/data.js`): sem sombras e resolução menor. Em qualquer aparelho, se a imagem ficar lenta, a resolução cai sozinha e volta a subir quando houver folga (`resolucaoAdaptativa`).
+- **Sensibilidade:** o giro da câmera ao arrastar o dedo fica em `celular.sensibilidadeToque`.
+- O jogo precisa estar num endereço web (como o GitHub Pages) para abrir no celular.
+
 ## A jornada
 
 | Etapa | Prédio | Personagem |
@@ -338,6 +359,7 @@ jornada-transparencia/
     ├── world.js        cidade, prédios, portões e torre do chefe final
     ├── interiors.js    ambientes internos de cada prédio
     ├── ranking.js      ranking das partidas (Firebase ou navegador)
+    ├── touch.js        controles de toque (celular e tablet) e troca automática
     ├── ui.js           painel, minimapa, diálogos e tela de vitória
     └── game.js         lógica do jogo: estados, progressão, câmera
 ```

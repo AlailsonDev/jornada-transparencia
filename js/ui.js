@@ -189,14 +189,18 @@ window.CT = window.CT || {};
   /* ---------------- Aviso de interação ---------------- */
   let promptKey = "";
   UI.prompt = function (text, kind, key) {
-    const el = $("prompt");
-    const k = (text || "") + (kind || "") + (key || "");
+    const el = $("prompt"), T = CT.Touch, toque = !!(T && T.ativo);
+    const k = (text || "") + (kind || "") + (key || "") + toque;
     if (k === promptKey) return;
     promptKey = k;
+    // no toque, o botão de ação mostra o verbo do aviso ("PARA ENTRAR" → ENTRAR)
+    const m = key && /^PARA\s+(\S+)\s*(.*)$/.exec(text || "");
+    if (T) T.setAcao(m ? m[1] : null);
     if (!text) { el.hidden = true; return; }
     el.hidden = false;
-    el.className = kind || "";
-    el.innerHTML = key ? `<span>PRESSIONE</span><span class="kbd">${esc(key)}</span><span>${esc(text)}</span>` : `<span>${esc(text)}</span>`;
+    el.className = (kind || "") + (key ? " acao" : "");
+    if (key && toque) el.innerHTML = m ? `<span>TOQUE EM</span><span class="kbd">${esc(m[1])}</span>${m[2] ? `<span>${esc(m[2])}</span>` : ""}` : `<span>TOQUE NO BOTÃO</span><span>${esc(text)}</span>`;
+    else el.innerHTML = key ? `<span>PRESSIONE</span><span class="kbd">${esc(key)}</span><span>${esc(text)}</span>` : `<span>${esc(text)}</span>`;
   };
 
   /* ---------------- Notificações ---------------- */
@@ -265,7 +269,7 @@ window.CT = window.CT || {};
   function head(stepLabel) {
     const s = D.cfg.speaker;
     const ini = s.nome.replace(/^(Dr\.ª?|Dra\.|Eng\.ª|Seu|Dona)\s+/i, "").split(/\s+/).map((w) => w[0]).slice(0, 2).join("");
-    return `<div class="dlg-head"><div class="avatar">${esc(ini)}</div><div><div class="dlg-name">${esc(s.nome)}</div><div class="dlg-role">${esc(s.cargo)}</div></div><div class="dlg-step">${esc(stepLabel)}</div></div>`;
+    return `<div class="dlg-head"><div class="avatar">${esc(ini)}</div><div><div class="dlg-name">${esc(s.nome)}</div><div class="dlg-role">${esc(s.cargo)}</div></div><div class="dlg-step">${esc(stepLabel)}</div><button class="dlg-x only-touch" type="button" aria-label="Fechar">✕</button></div>`;
   }
 
   // escreve o texto (falas com vários parágrafos: separados por uma linha em branco, "\n\n")
@@ -297,7 +301,7 @@ window.CT = window.CT || {};
     if (D.step === "intro") {
       const last = D.page >= c.paginas.length - 1;
       el.innerHTML = head(c.rotuloIntro || "Curiosidade") + `<div class="dlg-body"><p class="dlg-text"></p>${last && c.baseLegal ? `<span class="legal">Base legal: ${esc(c.baseLegal)}</span>` : ""}</div>
-        <div class="dlg-foot"><span class="hint"><span class="kbd">ESC</span> fechar</span><span class="hint" style="margin-right:0">${D.page + 1}/${c.paginas.length}</span>
+        <div class="dlg-foot"><span class="hint only-kbd"><span class="kbd">ESC</span> fechar</span><span class="hint" style="margin-right:0">${D.page + 1}/${c.paginas.length}</span>
         <button class="btn-dlg" id="dlg-next">${last ? (c.pergunta ? "VER A PERGUNTA" : (c.rotuloFim || "VAMOS LÁ!")) : "CONTINUAR"} <span class="kbd">ESPAÇO</span></button></div>`;
       typeInto(el.querySelector(".dlg-text"), c.paginas[D.page]);
       $("dlg-next").onclick = () => advance();
@@ -309,7 +313,7 @@ window.CT = window.CT || {};
         </div>
         <div class="dlg-foot">${wrongNow
             ? `<span class="hint">Releia a explicação e tente de novo. O tempo continua correndo.</span>${speedChip(c)}<button class="btn-dlg" id="dlg-retry">TENTAR NOVAMENTE <span class="kbd">ESPAÇO</span></button>`
-            : `<span class="hint"><span class="kbd">A</span><span class="kbd">B</span><span class="kbd">C</span><span class="kbd">D</span> ou clique para responder · <span class="kbd">ESC</span> fechar</span>${speedChip(c)}`}</div>`;
+            : `<span class="hint only-kbd"><span class="kbd">A</span><span class="kbd">B</span><span class="kbd">C</span><span class="kbd">D</span> ou clique para responder · <span class="kbd">ESC</span> fechar</span><span class="hint only-touch">Toque na alternativa para responder</span>${speedChip(c)}`}</div>`;
       el.querySelectorAll(".opt").forEach((b) => (b.onclick = () => answer(+b.dataset.i)));
       if (wrongNow) $("dlg-retry").onclick = () => retry();
     } else if (D.step === "right") {
@@ -354,6 +358,9 @@ window.CT = window.CT || {};
     D.open = false; $("dialog").hidden = true; D.cfg = null;
     if (c && c.onFim) c.onFim();
   }
+
+  // botão ✕ (toque): o mesmo que ESC
+  $("dialog").addEventListener("click", (e) => { if (e.target.closest(".dlg-x")) D.key({ key: "Escape" }); });
 
   /* Teclado dentro do diálogo. Retorna true se consumiu a tecla. */
   D.key = function (e) {

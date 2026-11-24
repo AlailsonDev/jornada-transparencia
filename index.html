@@ -2,7 +2,16 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <!-- celular/tablet: "Adicionar à tela inicial" abre o jogo em tela cheia -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0F2242">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Jornada">
+  <link rel="icon" href="assets/icones/icone-192.png">
+  <link rel="apple-touch-icon" href="assets/icones/apple-touch-icon.png">
   <title>A Jornada da Transparência</title>
   <!-- Fontes locais (pasta fonts/) e estilos da interface -->
   <link rel="stylesheet" href="css/fonts.css">
@@ -15,7 +24,7 @@
       <img src="assets/logos/ctrl-lab.png" alt="">
       <div class="intro-games"><span class="ig-a">Games</span> <span class="ig-b">Institucionais</span></div>
     </div>
-    <p class="intro-gate" hidden>Clique ou pressione qualquer tecla para começar</p>
+    <p class="intro-gate" hidden><span class="only-kbd">Clique ou pressione qualquer tecla para começar</span><span class="only-touch">Toque na tela para começar</span></p>
   </div>
 
   <!-- Tela do jogo (Three.js desenha aqui) -->
@@ -34,7 +43,7 @@
         <button class="menu-btn" id="btn-howto"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.6 2.6 0 0 1 5 .9c0 1.8-2.6 2.2-2.6 4"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg><span>COMO JOGAR</span></button>
         <button class="menu-btn" id="btn-credits"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z"/></svg><span>CRÉDITOS</span></button>
       </nav>
-      <p class="menu-hint"><span class="kbd">↑</span><span class="kbd">↓</span> escolher <span class="dot">·</span> <span class="kbd">ENTER</span> confirmar</p>
+      <p class="menu-hint only-kbd"><span class="kbd">↑</span><span class="kbd">↓</span> escolher <span class="dot">·</span> <span class="kbd">ENTER</span> confirmar</p>
       <div class="title-logos" id="title-logos" aria-label="Realização"></div>
     </div>
     <!-- música do menu: mostra a faixa e liga/desliga só a música -->
@@ -66,7 +75,16 @@
         </section>
         <section>
           <h3>Controles</h3>
-          <dl class="keys-table">
+          <dl class="keys-table only-touch">
+            <dt><span class="kbd">JOYSTICK</span></dt><dd>Lado esquerdo da tela: arraste o dedo para andar e girar. Empurrado até a borda, corre</dd>
+            <dt><span class="kbd">ARRASTAR</span></dt><dd>Lado direito da tela: girar a personagem e olhar para o céu ou para o chão</dd>
+            <dt><span class="kbd">PINÇA</span></dt><dd>Dois dedos: aproximar ou afastar a câmera. Toque duplo: recentrar</dd>
+            <dt><span class="kbd">PULAR</span></dt><dd>Botão redondo à direita. Perto de uma porta ou pessoa, ele vira ENTRAR ou CONVERSAR</dd>
+            <dt><span class="kbd">A</span><span class="kbd">B</span><span class="kbd">C</span><span class="kbd">D</span></dt><dd>Toque na alternativa para responder</dd>
+            <dt><span class="kbd">MAPA</span></dt><dd>Toque no minimapa para ampliar</dd>
+            <dt><span class="kbd">☰</span></dt><dd>Menu: continuar, som ou sair do jogo</dd>
+          </dl>
+          <dl class="keys-table only-kbd">
             <dt><span class="kbd">↑</span><span class="kbd">↓</span></dt><dd>Andar para frente e para trás</dd>
             <dt><span class="kbd">←</span><span class="kbd">→</span> <span class="kbd">MOUSE</span></dt><dd>Girar a personagem (mova o mouse para os lados, sem clicar). Para cima e para baixo: olhar o céu ou o chão</dd>
             <dt><span class="kbd">SHIFT</span></dt><dd>Correr</dd>
@@ -95,7 +113,7 @@
         <button class="btn-primary" id="cs-go">COMEÇAR A JORNADA</button>
         <button class="btn-ghost" id="cs-back">VOLTAR</button>
       </div>
-      <div class="cs-hint"><span class="kbd">←</span><span class="kbd">→</span> escolher · <span class="kbd">ENTER</span> começar · <span class="kbd">ESC</span> voltar</div>
+      <div class="cs-hint only-kbd"><span class="kbd">←</span><span class="kbd">→</span> escolher · <span class="kbd">ENTER</span> começar · <span class="kbd">ESC</span> voltar</div>
     </div>
   </section>
 
@@ -168,9 +186,9 @@
     <div class="panel" id="map-panel">
       <canvas id="minimap" width="420" height="420"></canvas>
       <div class="legend"><span><i style="background:#6B7385"></i>Bloqueado</span><span><i style="background:#FFB020"></i>Disponível</span><span><i style="background:#18B26B"></i>Concluído</span></div>
-      <div class="map-hint"><span class="kbd">M</span> mapa ampliado</div>
+      <div class="map-hint"><span class="only-kbd"><span class="kbd">M</span> mapa ampliado</span><span class="only-touch">Toque para ampliar</span></div>
     </div>
-    <div class="panel" id="help">
+    <div class="panel only-kbd" id="help">
       <span><span class="kbd">↑</span><span class="kbd">↓</span> andar</span>
       <span><span class="kbd">←</span><span class="kbd">→</span> girar</span>
       <span><span class="kbd">SHIFT</span> correr</span>
@@ -186,7 +204,7 @@
   <!-- MAPA AMPLIADO -->
   <div id="bigmap" hidden>
     <div class="panel">
-      <h2>Mapa da cidade <span class="kbd">M</span></h2>
+      <div class="bigmap-head"><h2>Mapa da cidade <span class="kbd only-kbd">M</span></h2><button class="btn-dlg" data-close-map>FECHAR <span class="kbd">ESC</span></button></div>
       <canvas id="bigmap-canvas" width="900" height="900"></canvas>
       <div class="legend"><span><i style="background:#6B7385"></i>Bloqueado</span><span><i style="background:#FFB020"></i>Disponível</span><span><i style="background:#18B26B"></i>Concluído</span><span><i style="background:#8E44FF"></i>Desafio final</span><span><i style="background:#E2574C"></i>Portão fechado</span></div>
     </div>
@@ -210,6 +228,12 @@
   <div id="fade"></div>
   <canvas id="fx"></canvas>
 
+  <!-- celular na vertical: pede para girar -->
+  <div id="rotate" aria-live="polite">
+    <svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="20" y="6" width="24" height="40" rx="4"/><path d="M29 40h6"/><path d="M10 50a24 24 0 0 0 34 8"/><path d="M44 52v6h-6"/></svg>
+    <p><b>Gire o aparelho</b>O jogo funciona na horizontal.</p>
+  </div>
+
   <!-- Bibliotecas e módulos do jogo (ordem importa) -->
   <script src="vendor/three.min.js"></script>          <!-- Three.js r147 -->
   <script src="vendor/GLTFLoader.js"></script>         <!-- leitura de modelos .glb -->
@@ -230,6 +254,7 @@
   <script src="vendor/firebase-app-compat.js"></script>       <!-- Firebase 12.18 (ranking compartilhado) -->
   <script src="vendor/firebase-firestore-compat.js"></script> <!-- Firestore: banco do ranking online -->
   <script src="js/ranking.js"></script>   <!-- ranking das partidas (online no Firebase ou no navegador) -->
+  <script src="js/touch.js"></script>     <!-- controles de toque (celular e tablet) -->
   <script src="js/ui.js"></script>        <!-- interface e diálogos -->
   <script src="js/game.js"></script>      <!-- lógica principal -->
 </body>

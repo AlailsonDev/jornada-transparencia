@@ -9,6 +9,8 @@ window.CT = window.CT || {};
 (function () {
   const U = CT.U, UI = CT.UI, A = CT.Audio;
   const CFG = CT.CONFIG;
+  /** texto do teclado ou do toque; o CSS mostra o do modo atual (troca na hora) */
+  const K = (teclado, toque) => `<span class="only-kbd">${teclado}</span><span class="only-touch">${toque}</span>`;
   const N = CT.PREDIOS.length; // 8 prédios
 
   let renderer, camera, world, interiors, player, arrow;
@@ -43,8 +45,11 @@ window.CT = window.CT || {};
       ]);
     } catch (e) { /* segue com fontes do sistema */ }
 
+    // celulares e tablets: qualidade própria (CT.CONFIG.celular)
+    if (CT.Touch && CT.Touch.movel && CFG.celular) Object.assign(CFG, CFG.celular);
     renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("game"), antialias: true, powerPreference: "high-performance" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, CFG.pixelRatioMaximo));
+    quality.max = quality.pr = Math.min(window.devicePixelRatio || 1, CFG.pixelRatioMaximo);
+    renderer.setPixelRatio(quality.pr);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -80,7 +85,9 @@ window.CT = window.CT || {};
     window.addEventListener("keyup", (e) => { keys[e.code] = false; });
     window.addEventListener("blur", () => { for (const k in keys) keys[k] = false; });
     document.getElementById("mute").onclick = toggleMute;
-    document.getElementById("bigmap").onclick = (e) => { if (e.target.id === "bigmap") setMap(false); };
+    document.getElementById("bigmap").onclick = (e) => { if (e.target.id === "bigmap" || e.target.closest("[data-close-map]")) setMap(false); };
+    // tocar/clicar no minimapa abre o mapa ampliado
+    document.getElementById("map-panel").onclick = () => { if ((G.mode === "city" || G.mode === "interior") && !G.paused && !UI.dialog.open) setMap(true); };
 
     resetProgress();
     G.mode = "title";
@@ -111,6 +118,22 @@ window.CT = window.CT || {};
     startBtn.focus();
     renderer.setAnimationLoop(loop);
   };
+
+  /* Resolução adaptativa: mede a taxa de quadros durante o jogo; abaixo de
+   * ~40 qps reduz a resolução, com folga sobe de novo (sem passar de um
+   * nível que já se mostrou pesado demais). */
+  const quality = { pr: 1, max: 1, teto: 99, t: 0, n: 0, min: 0.6 };
+  function adaptQuality(raw) {
+    if (!CFG.resolucaoAdaptativa || raw > 0.25) return; // aba em segundo plano, carregamento
+    quality.t += raw; quality.n++;
+    if (quality.t < 2.5) return;
+    const fps = quality.n / quality.t;
+    quality.t = 0; quality.n = 0;
+    let pr = quality.pr;
+    if (fps < 40 && pr > quality.min) { quality.teto = pr - 0.01; pr = Math.max(quality.min, pr - 0.2); }
+    else if (fps > 56 && pr + 0.1 <= Math.min(quality.max, quality.teto)) pr += 0.1;
+    if (pr !== quality.pr) { quality.pr = pr; renderer.setPixelRatio(pr); renderer.setSize(window.innerWidth, window.innerHeight); }
+  }
 
   function onResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -176,7 +199,7 @@ window.CT = window.CT || {};
     if (G.festa) return "Você achou a <b>Casa de Festas</b>, uma área secreta! Dance com o dinossauro e saia pela <b>porta</b> quando quiser.";
     if (G.scene === "interior" && G.current >= 0) {
       const d = CT.PREDIOS[G.current];
-      return G.completed[G.current] ? `Desafio concluído! Volte à cidade pela <b>saída</b> (ESPAÇO na porta).` : `Converse com <b>${d.npc.chamado || d.npc.nome}</b> ${d.npc.local || "no balcão"}.`;
+      return G.completed[G.current] ? `Desafio concluído! Volte à cidade pela <b>saída</b> (${K("ESPAÇO", "VOLTAR")} na porta).` : `Converse com <b>${d.npc.chamado || d.npc.nome}</b> ${d.npc.local || "no balcão"}.`;
     }
     const nx = nextIndex();
     if (nx >= N) return `Enfrente o <b>${CT.BOSS.nome}</b> na ${CT.BOSS.predio}.`;
@@ -278,9 +301,9 @@ window.CT = window.CT || {};
     UI.showHUD(true);
     await UI.fade(false);
     G.mode = "city";
-    if (fase === 0) UI.toast(`${charDef(G.charId).genero === "f" ? "Bem-vinda" : "Bem-vindo"}, ${charDef(G.charId).nome}! Comece pelo prédio <b>1 · ${CT.PREDIOS[0].nome}</b>. Use as <b>setas</b> para andar.`, "", 5200);
-    else if (fase < N) UI.toast(`Fase <b>${fase + 1} · ${CT.PREDIOS[fase].nome}</b>. Aperte <b>ESPAÇO</b> na porta para entrar.`, "", 5200);
-    else UI.toast(`Fase final! Aperte <b>ESPAÇO</b> para enfrentar o <b>${CT.BOSS.nome}</b>.`, "boss", 5200);
+    if (fase === 0) UI.toast(`${charDef(G.charId).genero === "f" ? "Bem-vinda" : "Bem-vindo"}, ${charDef(G.charId).nome}! Comece pelo prédio <b>1 · ${CT.PREDIOS[0].nome}</b>. ${K("Use as <b>setas</b> para andar.", "Use o <b>joystick</b> à esquerda para andar.")}`, "", 5200);
+    else if (fase < N) UI.toast(`Fase <b>${fase + 1} · ${CT.PREDIOS[fase].nome}</b>. ${K("Aperte <b>ESPAÇO</b>", "Toque em <b>ENTRAR</b>")} na porta para entrar.`, "", 5200);
+    else UI.toast(`Fase final! ${K("Aperte <b>ESPAÇO</b>", "Toque em <b>ENFRENTAR</b>")} para enfrentar o <b>${CT.BOSS.nome}</b>.`, "boss", 5200);
   }
 
   function setScene(which) {
@@ -876,13 +899,21 @@ window.CT = window.CT || {};
   /* ---------------- movimento do personagem ---------------- */
   function movePlayer(dt) {
     const canMove = (G.mode === "city" || G.mode === "interior") && !G.mapOpen;
-    const fwd = canMove && (keys.ArrowUp || keys.KeyW) ? 1 : 0;
-    const back = canMove && (keys.ArrowDown || keys.KeyS) ? 1 : 0;
+    let fwd = canMove && (keys.ArrowUp || keys.KeyW) ? 1 : 0;
+    let back = canMove && (keys.ArrowDown || keys.KeyS) ? 1 : 0;
     const left = canMove && (keys.ArrowLeft || keys.KeyA) ? 1 : 0;
     const right = canMove && (keys.ArrowRight || keys.KeyD) ? 1 : 0;
-    const run = keys.ShiftLeft || keys.ShiftRight;
-    if (player.mode === "dance" && (fwd || back || left || right)) player.mode = "idle";   // andou: para de dançar
-    P.heading += (left - right) * CFG.velocidadeGiro * dt;
+    let run = keys.ShiftLeft || keys.ShiftRight;
+    let turn = left - right;
+    // joystick de toque: para frente/trás anda, para os lados gira (proporcional); na borda, corre
+    const tj = CT.Touch && CT.Touch.joy;
+    if (canMove && tj && tj.ativo && tj.m > 0.15) {
+      if (tj.y < -0.3) fwd = 1; else if (tj.y > 0.5) back = 1;
+      if (Math.abs(tj.x) > 0.2) turn = -Math.sign(tj.x) * Math.min(1, (Math.abs(tj.x) - 0.2) / 0.6);
+      if (fwd && tj.m > 0.92) run = true;
+    }
+    if (player.mode === "dance" && (fwd || back || turn)) player.mode = "idle";   // andou: para de dançar
+    P.heading += turn * CFG.velocidadeGiro * dt;
     const target = fwd ? (run ? CFG.velocidadeCorrida : CFG.velocidadeCaminhada) : back ? -CFG.velocidadeCaminhada * 0.55 : 0;
     P.speed = U.damp(P.speed, target, 10, dt);
     if (Math.abs(P.speed) < 0.01 && !fwd && !back) P.speed = 0;
@@ -977,6 +1008,7 @@ window.CT = window.CT || {};
   const lockAllowed = () => (G.mode === "city" || G.mode === "interior" || G.mode === "transition" || G.mode === "cutscene") && !G.mapOpen && !UI.dialog.open;
   /** prende o ponteiro (precisa partir de um clique ou tecla do jogador) */
   function lockPointer() {
+    if (CT.Touch && CT.Touch.ativo) return; // no toque não há ponteiro para prender
     if (!gameCanvas || camCtl.locked || G.paused || !lockAllowed() || !gameCanvas.requestPointerLock) return;
     try { const r = gameCanvas.requestPointerLock(); if (r && r.catch) r.catch(() => {}); } catch (e) { /* navegador recusou */ }
   }
@@ -986,6 +1018,24 @@ window.CT = window.CT || {};
     const hide = cursorHidden();
     if (camCtl.locked && !hide) unlockPointer();
     document.body.classList.toggle("hide-cursor", hide);
+    // controles de toque: só enquanto a personagem pode andar
+    if (CT.Touch) CT.Touch.mostrar(camActive() && !G.paused && !UI.topModal());
+  }
+  /* câmera pelo toque: arrastar gira e inclina, pinça aproxima/afasta */
+  function applyTouchCamera() {
+    if (!CT.Touch) return;
+    const t = CT.Touch.consumeLook();
+    if (!camActive()) return;
+    const s = CFG.sensibilidadeToque || 0.006;
+    if (t.dx || t.dy) lookBy(t.dx * s, t.dy * s);
+    if (t.zoom !== 1) { camCtl.dist = U.clamp(camCtl.dist * t.zoom, 3.6, 16); camCtl.idle = 0; camCtl.recenter = false; }
+  }
+  /** gira a personagem (dx) e inclina a câmera (dy), em radianos */
+  function lookBy(dx, dy) {
+    camCtl.idle = 0; camCtl.recenter = false;
+    P.heading -= dx;               // gira a personagem no eixo
+    // para cima = olhar para cima (até quase o zênite); para baixo = olhar o chão
+    camCtl.pitch = U.clamp(camCtl.pitch + dy * 0.9, EL_MIN - BASE_PITCH, EL_MAX - BASE_PITCH);
   }
   let expectedUnlock = false;
   function unlockPointer() {
@@ -1010,10 +1060,7 @@ window.CT = window.CT || {};
       const dx = e.movementX || 0, dy = e.movementY || 0;
       if (Math.abs(dx) > 300 || Math.abs(dy) > 300) return; // ignora saltos do navegador
       if (!dx && !dy) return;
-      camCtl.idle = 0; camCtl.recenter = false;
-      P.heading -= dx * CFG.sensibilidadeMouse;               // gira a personagem no eixo
-      // mouse para cima = olhar para cima (até quase o zênite); para baixo = olhar o chão
-      camCtl.pitch = U.clamp(camCtl.pitch + dy * CFG.sensibilidadeMouse * 0.9, EL_MIN - BASE_PITCH, EL_MAX - BASE_PITCH);
+      lookBy(dx * CFG.sensibilidadeMouse, dy * CFG.sensibilidadeMouse);
     });
     canvas.addEventListener("wheel", (e) => {
       if (!camActive()) return;
@@ -1233,6 +1280,8 @@ window.CT = window.CT || {};
 
     // tempo de partida (para o ranking): conta durante o jogo, não no menu de pausa
     if (!G.over && !G.explore && G.mode !== "ended" && G.mode !== "victory") G.playTime += Math.min(raw, 1);
+    applyTouchCamera();
+    adaptQuality(raw);
     movePlayer(dt);
 
     if (G.scene === "city") {

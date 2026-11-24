@@ -109,6 +109,15 @@ CT.CONFIG = {
 
   sombras: true,             // desative em computadores mais fracos
   pixelRatioMaximo: 1.75,
+  // a resolução cai sozinha se o aparelho não der conta (e volta a subir quando dá)
+  resolucaoAdaptativa: true,
+
+  // CELULARES E TABLETS: estes valores substituem os de cima nesses aparelhos
+  celular: {
+    sombras: false,          // o maior ganho de desempenho
+    pixelRatioMaximo: 1.25,
+    sensibilidadeToque: 0.006, // giro da câmera ao arrastar o dedo
+  },
 };
 
 /* ---------------------------------------------------------------------
