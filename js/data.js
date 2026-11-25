@@ -274,7 +274,7 @@ CT.PREDIOS = [
     destaque: "#6FE3FF",
     decoracao: "lgpd",
     npc: {
-      nome: "Dra. Beatriz", modelo: "feminino",
+      nome: "Dra. Cláudia", modelo: "feminino",
       cargo: "Encarregada de Dados",
       pele: "#F1C7A5", cabelo: "#6B3B1F", estiloCabelo: "rabo",
       camisa: "#2D3E8F", calca: "#1E2433", acessorio: "oculos", altura: 1.74, corpo: 0.94 },
@@ -494,9 +494,9 @@ CT.MODELOS = {
     // sem "cor" mantém o pixel original (ex.: camisa branca, botões).
     // Personagens feitos a partir de desenhos enviados pela equipe
     // (ferramentas/personagem-desenho/): as cores já vêm prontas na textura.
-    // Luana: Michelle (Mixamo) com cabelo comprido novo, sorriso, delineado,
-    // jaqueta jeans e blusa amarela.
-    mulherJaqueta: { arquivo: "mulher-jaqueta.glb", altura: 1.69, origem: "Mixamo — Michelle, adaptada a partir do desenho",
+    // Ana Beatriz: Michelle (Mixamo) refeita a partir do desenho: cabelo preto liso preso em rabo de
+    // cavalo, óculos de armação rosa-clara, sorriso de lado, colar com pingente, casaco de oncinha e blusa preta.
+    anaBeatriz: { arquivo: "ana-beatriz.glb", altura: 1.69, origem: "Mixamo — Michelle, adaptada a partir do desenho",
       cabeca: { abaixoDoTopo: 0.2, frente: 0.1 }, torso: { frente: 0.13, altura: 0.04, costas: 0.17 } },
     // Seu Lima, guarda municipal do pórtico de boas-vindas (feito a partir de uma foto):
     // o mesmo avatar do Caio, com sorriso largo, farda, boné de guarda e coturnos (tudo no arquivo).
@@ -591,9 +591,9 @@ CT.PERSONAGENS = [
   { id: "paulo", nome: "Paulo", genero: "m", papel: "Jornalista investigativo",
     descricao: "Terno azul, gravata vinho e sorriso confiante. Conhece cada licitação da cidade de cor e salteado.",
     modelo: "pauloTerno" },
-  { id: "luana", nome: "Luana", genero: "f", papel: "Comunicadora digital",
-    descricao: "Sorriso aberto e a inseparável jaqueta jeans. Explica nas redes, em linguagem simples, tudo o que descobre nos portais de transparência.",
-    modelo: "mulherJaqueta" },
+  { id: "anabeatriz", nome: "Ana Beatriz", genero: "f", papel: "Comunicadora digital",
+    descricao: "Rabo de cavalo, óculos de armação rosa, sorriso de canto e o casaco de oncinha que não tira por nada. Explica nas redes, em linguagem simples, tudo o que descobre nos portais de transparência.",
+    modelo: "anaBeatriz" },
   { id: "antonio", nome: "Seu Antônio", genero: "m", papel: "Contador aposentado",
     descricao: "Cabelo grisalho, camisa social e relógio no pulso. Confere as contas públicas linha por linha, com calma e bom humor.",
     modelo: "senhorCamisa" },
@@ -692,7 +692,7 @@ CT.CREDITOS = [
     "Caio: criado a partir de um desenho enviado pela equipe, sobre um avatar Ready Player Me (barba, cabelo, aparelho, camiseta e corrente refeitos para o jogo)",
     "Prefeito: criado a partir de um desenho enviado pela equipe, sobre um avatar Ready Player Me (licença Creative Commons 4.0 para uso não comercial; rosto, cabelo, óculos e camisa refeitos para o jogo)",
     "Paulo: criado a partir de um desenho enviado pela equipe, sobre um avatar Ready Player Me (licença Creative Commons 4.0 para uso não comercial; rosto, cabelo, terno e gravata refeitos para o jogo)",
-    "Luana: criada a partir de um desenho enviado pela equipe, sobre a Michelle do Mixamo (cabelo, rosto, jaqueta e roupas refeitos para o jogo)",
+    "Ana Beatriz: criada a partir de um desenho enviado pela equipe, sobre a Michelle do Mixamo (cabelo, rosto, casaco de oncinha e roupas refeitos para o jogo)",
     "Corrupson: criado a partir de um desenho enviado pela equipe; malha nova sobre o esqueleto e as animações do RobotExpressive, de Tomás Laulhé (domínio público, CC0)",
     "Seu Lima (guarda municipal): criado a partir de uma foto enviada pela equipe, sobre um avatar Ready Player Me (rosto, sorriso, farda e boné refeitos para o jogo)",
     "Seu Antônio: criado a partir de um desenho enviado pela equipe, sobre um avatar Ready Player Me (rosto, cabelo, camisa e relógio refeitos para o jogo)",

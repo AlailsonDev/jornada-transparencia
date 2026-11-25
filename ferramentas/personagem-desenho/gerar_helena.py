@@ -1,7 +1,7 @@
 """Gera assets/modelos/originais/helena.glb — a Helena, feita a partir do desenho desenho-helena.png
 (moça de cabelo castanho-escuro liso e comprido, repartido de lado e sem franja, sorriso aberto,
 delineado, blusa branca de manga curta bufante e colar dourado com pingente de coração), a partir
-da Michelle (Mixamo), com o mesmo processo da Luana (gerar_mulher.py):
+da Michelle (Mixamo), com o mesmo processo de gerar_mulher.py:
 
   * tira o cabelo de coques, os fones e os óculos da Michelle;
   * cria o cabelo novo (malha própria, presa à cabeça e às costas) sem franja;

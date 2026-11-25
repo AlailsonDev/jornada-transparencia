@@ -3,7 +3,7 @@
 castanho-escuro ao caramelo, caindo sobre o ombro esquerdo; argolas douradas, pinta na testa,
 delineado gatinho, batom vermelho, camisa social bege listrada de mangas compridas com gola e
 decote em V, relógio prateado no pulso esquerdo, calça marrom com cinto e correntes douradas),
-a partir da Michelle (Mixamo), com o mesmo processo da Luana (gerar_mulher.py):
+a partir da Michelle (Mixamo), com o mesmo processo de gerar_mulher.py:
 
   * tira o cabelo de coques, os fones e os óculos da Michelle;
   * pinta a textura: pele, boca, delineado, pinta na testa, calça marrom com cinto e correntes;
