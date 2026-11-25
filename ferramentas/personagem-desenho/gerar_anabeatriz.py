@@ -576,7 +576,7 @@ colP = np.array(colP, np.float32); colN = np.array(colN, np.float32); colI = np.
 colJ = np.array(colJ, np.uint8); colW = np.array(colW, np.float32)
 
 # =====================================================================
-# ÓCULOS DE GRAU: armação rosa-clara, aros arredondados, ponte e hastes até as orelhas
+# ÓCULOS DE GRAU: armação rosa-clara grossa, aros ovais, ponte e hastes até as orelhas
 # =====================================================================
 corpoP = P[TV == 'corpo']
 def zfrente(px, py, raio=0.006):
@@ -586,7 +586,7 @@ def xlado(py, pz, raio=0.008):
     m_ = (np.abs(corpoP[:, 1] - py) < raio) & (np.abs(corpoP[:, 2] - pz) < raio)
     return np.abs(corpoP[m_, 0]).max() if m_.any() else 0.075
 ocP, ocI = [], []
-def tubo_oc(pts, r=0.0021, fechado=False, ns=8):
+def tubo_oc(pts, r=0.0033, fechado=False, ns=10):
     pts = np.asarray(pts, float)
     if fechado: pts = np.vstack([pts, pts[:1]])
     b0 = len(ocP)
@@ -603,18 +603,16 @@ ZL = max(zfrente(0.012, 1.462), zfrente(0.043, 1.476), zfrente(0.043, 1.436)) + 
 def z_aro(px, py):
     zc = ZL - 0.016 * max((abs(px) - 0.012) / 0.058, 0) ** 2         # acompanha a curva do rosto
     return max(zc, zfrente(px, py, 0.005) + 0.0045)
-CXo, CYo, HWo, HHo, RRo = 0.0425, 1.4555, 0.0285, 0.0195, 0.009
+CXo, CYo, HWo, HHo = 0.0425, 1.4555, 0.0285, 0.0205
 for sx in (-1, 1):
     aro = []
-    for qx, qy, a0 in ((HWo - RRo, HHo - RRo, 0), (-(HWo - RRo), HHo - RRo, 90), (-(HWo - RRo), -(HHo - RRo), 180), (HWo - RRo, -(HHo - RRo), 270)):
-        for a_ in np.linspace(a0, a0 + 90, 7):
-            ar = math.radians(a_)
-            px = sx * (CXo + qx + RRo * math.cos(ar)); py = CYo + qy + RRo * math.sin(ar)
-            py += 0.003 * max(abs(px) - CXo, 0) / HWo          # canto de fora levemente erguido
-            aro.append([px, py, z_aro(px, py)])
+    for a_ in np.linspace(0, 360, 48, endpoint=False):          # aro oval
+        ar = math.radians(a_)
+        px = sx * (CXo + HWo * math.cos(ar)); py = CYo + HHo * math.sin(ar)
+        aro.append([px, py, z_aro(px, py)])
     tubo_oc(aro, fechado=True)
     # haste: da borda de fora, rente à lateral da cabeça, até atrás da orelha
-    x0 = sx * (CXo + HWo); y0 = CYo + 0.008; z0 = z_aro(x0, y0)
+    x0 = sx * (CXo + HWo * 0.97); y0 = CYo + 0.005; z0 = z_aro(x0, y0)
     hs = []
     for t_ in np.linspace(0, 1, 9):
         zz = z0 + (-0.030 - z0) * t_
@@ -622,9 +620,9 @@ for sx in (-1, 1):
         xx = max(abs(x0) + 0.006 * t_, xlado(yy, zz) + 0.0045)
         hs.append([sx * xx, yy, zz])
     hs.append([sx * (hs[-1][0] * sx - 0.002), yy - 0.014, -0.040])   # ponta curva atrás da orelha
-    tubo_oc(hs, r=0.0017)
+    tubo_oc(hs, r=0.0025)
 pz_ = max(zfrente(0.0, 1.462), ZL) + 0.002
-tubo_oc([[-(CXo - HWo) - 0.001, CYo + 0.006, z_aro(CXo - HWo, CYo + 0.006)], [0, CYo + 0.009, pz_], [(CXo - HWo) + 0.001, CYo + 0.006, z_aro(CXo - HWo, CYo + 0.006)]], r=0.0018)   # ponte
+tubo_oc([[-(CXo - HWo) - 0.001, CYo + 0.006, z_aro(CXo - HWo, CYo + 0.006)], [0, CYo + 0.009, pz_], [(CXo - HWo) + 0.001, CYo + 0.006, z_aro(CXo - HWo, CYo + 0.006)]], r=0.0028)   # ponte
 ocP = np.array(ocP, np.float32); ocI = np.array(ocI)
 ocN = ocP - np.array([0, CYo, 0.0], np.float32); ocN[:, 1] *= 0.3
 ocJ = np.tile([JI['Head'], 0, 0, 0], (len(ocP), 1)).astype(np.uint8); ocW = np.tile([1.0, 0, 0, 0], (len(ocP), 1)).astype(np.float32)
