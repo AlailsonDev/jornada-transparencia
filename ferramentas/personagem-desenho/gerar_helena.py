@@ -1,13 +1,15 @@
 """Gera assets/modelos/originais/helena.glb — a Helena, feita a partir do desenho desenho-helena.png
-(moça de cabelo castanho-escuro liso e comprido, repartido de lado e sem franja, sorriso aberto,
-delineado, blusa branca de manga curta bufante e colar dourado com pingente de coração), a partir
+(moça de cabelo preto liso e comprido, repartido de lado e sem franja, sorriso discreto de boca fechada,
+delineado e colar dourado com pingente de coração; no jogo ela usa roupa social: blazer preto, camisa branca, calça e salto), a partir
 da Michelle (Mixamo), com o mesmo processo de gerar_mulher.py:
 
   * tira o cabelo de coques, os fones e os óculos da Michelle;
   * cria o cabelo novo (malha própria, presa à cabeça e às costas) sem franja;
-  * pinta pele, boca, delineado e calça jeans;
-  * cria a blusa branca: "casca" sobre o tronco e o alto dos braços, com mangas bufantes;
-  * colar dourado com pingente de coração (malha nova).
+  * pinta pele, boca, delineado, camisa branca (gola em V, carcela e botões) e calça social preta com vinco;
+  * afina a calça bufante da Michelle (perna reta, barra até o sapato) e faz o sapato preto de salto bloco;
+  * cria o blazer preto: "casca" sobre o tronco e os braços, aberta em V, com lapelas e um botão;
+  * colar dourado com pingente de coração (malha nova);
+  * óculos de grau de armação preta fina, estilo gatinho (malha nova).
 
 Uso:  python3 ferramentas/personagem-desenho/gerar_helena.py
 Depois rode  node ferramentas/embutir-modelos.js  para atualizar a versão embutida."""
@@ -72,6 +74,40 @@ for r_, t_ in tipo.items():
 # o cabelo antigo sai inteiro (o cabelo novo fecha a cabeça, que na Michelle não tem nuca)
 fora = np.isin(TV, ['fones', 'oculos', 'cabelo'])
 I = I[~fora[I].any(1)]
+
+# ---------------- calça social: perna reta até o sapato (a calça da Michelle é bufante, com punho) ----------------
+cp_ = TV == 'corpo'
+perna = np.where(cp_ & (P[:, 1] < 0.64) & (P[:, 1] > 0.10) & (np.abs(P[:, 0]) > 0.012))[0]
+P0 = P.copy()
+for i in perna:
+    lado_ = np.sign(P0[i, 0])
+    anel = perna[(np.abs(P0[perna, 1] - P0[i, 1]) < 0.003) & (np.sign(P0[perna, 0]) == lado_)]
+    cx_, cz_ = P0[anel, 0].mean(), P0[anel, 2].mean()
+    r_anel = np.hypot(P0[anel, 0] - cx_, P0[anel, 2] - cz_).mean()
+    yy = P0[i, 1]
+    r_alvo = np.interp(yy, [0.10, 0.22, 0.36, 0.50, 0.64], [0.061, 0.060, 0.061, 0.066, r_anel])
+    w_ = suave(yy, 0.50, 0.64)
+    k_ = ((1 - w_) * r_alvo + w_ * r_anel) / max(r_anel, 1e-4)
+    P[i, 0] = cx_ + (P0[i, 0] - cx_) * k_
+    P[i, 2] = cz_ + (P0[i, 2] - cz_) * k_
+    P[i, 1] = yy - 0.085 * (1 - suave(yy, 0.22, 0.36))        # a barra desce até cobrir o sapato
+# ---------------- sapato de salto: preto, bico mais fino e vão debaixo do arco (salto bloco atrás) ----------------
+for r_, t_ in tipo.items():
+    if t_ != 'tenis': continue
+    m_ = roots == r_
+    q = P[m_]; cxs = q[:, 0].mean()
+    sola = comp[r_]['lo'][1] < 0.0
+    xx, yy, zz = q[:, 0].copy(), q[:, 1].copy(), q[:, 2].copy()
+    afina = 0.88 * (1 - 0.38 * suave(zz, 0.12, 0.206))           # mais estreito e de bico fino
+    xx = cxs + (xx - cxs) * afina
+    if sola:
+        vao = suave(zz, 0.0, 0.025) * (1 - suave(zz, 0.085, 0.12))
+        yy = np.where(yy < 0.046, np.maximum(yy, 0.044 * vao), yy)   # o arco sobe; o salto fica atrás
+        salto = zz < 0.002
+        xx = np.where(salto, cxs + (xx - cxs) * 0.72, xx)            # salto bloco mais estreito
+    P[m_] = np.c_[xx, yy, zz]
+sap_tri = I[TV[I[:, 0]] == 'tenis']
+I = I[TV[I[:, 0]] != 'tenis']
 CODE = {'corpo': 0, 'touca': 1, 'sobrancelha': 2, 'olho': 3, 'tenis': 4}
 code = np.array([CODE.get(t, 9) for t in TV], np.float32)
 
@@ -90,7 +126,7 @@ h, s, v = rgb2hsv(tx)
 ehcorpo = C == 0
 braco = np.abs(X) > 0.20
 
-PELE = cor('#D49866'); BLUSA = cor('#F1EEEA'); CALCA = cor('#3C5178'); CABELO = cor('#2C1B12')
+PELE = cor('#D49866'); BLUSA = cor('#F4F2EE'); CALCA = cor('#1E1E24'); CABELO = cor('#17141A')
 pele_m = ehcorpo & (h > 8) & (h < 36) & (s > 0.3) & (v > 0.12) & (v < 0.82)
 rosto = ehcorpo & (Y > 1.33) & (np.abs(X) < 0.11)
 vm = v[pele_m].mean()
@@ -101,31 +137,52 @@ vs = np.where(rosto, blur(v, 1.6), v)   # rosto: tira o pontilhado da textura or
 palp = rosto & (Y > 1.457) & (Y < 1.50) & (np.abs(X) > 0.012) & (np.abs(X) < 0.075) & (Z > 0.03)
 vs = np.where(palp, blur(np.maximum(v, np.median(v[palp]) * 0.95), 5.0), vs)
 alvo_pele |= palp    # pálpebras: sem os cílios pintados (viram o delineado)
+boca_v = ehcorpo & (Y > 1.335) & (Y < 1.415) & (np.abs(X) < 0.065) & (Z > -0.01)
+alvo_pele |= boca_v   # boca aberta da Michelle some (a boca nova é fechada)
+vs = np.where(boca_v, np.maximum(blur(vs, 3.0), np.median(v[rosto & pele_m]) * 0.92), vs)
 f = np.clip(vs / vm, 0.45, 1.5) ** 0.9
 rosado = np.clip(((h < 12) | (h > 330)) * (s - 0.3) * 1.2, 0, 0.35)[..., None]   # blush vira um rosado leve
 pele_cor = PELE[None, None, :] * f[..., None]
 pele_cor = pele_cor * (1 - rosado * 0.5) + cor('#D9725F')[None, None, :] * f[..., None] * rosado * 0.5
 out[alvo_pele] = pele_cor[alvo_pele]
-# calça: a amarela e os detalhes azuis viram uma calça escura
-calca_m = ehcorpo & (Y < 1.03) & (Y > 0.12) & ~pele_m
-amarelo = (h > 36) & (h < 66) & (s > 0.42)
-fc = np.where(amarelo, np.clip(v / 0.9, 0.5, 1.2), np.clip(0.55 + v * 0.5, 0.5, 1.0))
-fc = blur(fc, 1.0)
+# calça social preta: lisa (sem os bolsos e joelheiras da calça da Michelle), com vinco na frente
+calca_m = ehcorpo & (Y < 1.03) & (Y > 0.0) & ~(pele_m & (Y > 0.26))   # tornozelo: vira calça (a barra desceu)
+fc = blur(np.clip(0.8 + v * 0.3, 0.85, 1.1), 8.0)
 out[calca_m] = (CALCA[None, None, :] * fc[..., None])[calca_m]
+cxl = 0.103 - 0.03 * np.clip((Y - 0.2) / 0.4, 0, 1)
+vinco = calca_m & (Z > 0.0) & (Y < 0.88) & (np.abs(np.abs(X) - cxl) < 0.0016)
+out[vinco] = (CALCA * 1.9)[None, :]
+cos_ = calca_m & (Y > 0.995) & (~braco)               # cós
+out[cos_] = (CALCA * 0.75)[None, :]
 # blusa amarela de tricô: a regata cinza + a barriga até a cintura da calça
 cinza = ehcorpo & (s < 0.25) & (v > 0.3) & (Y > 1.0) & ~rosto
 barriga = ehcorpo & (Y > 1.0) & (Y < 1.20) & ~braco & ~cinza & ~calca_m
 faixa_azul = ehcorpo & (h > 170) & (h < 210) & (Y > 1.0)
 blusa = cinza | barriga | faixa_azul
-pon = 1 + 0.07 * np.sin(np.arange(W)[None, :] * 2 * np.pi / 4.0) * np.sin(np.arange(W)[:, None] * 2 * np.pi / 6.0)
-fb = np.where(cinza, np.clip(v / np.median(v[cinza]), 0.7, 1.2), 1.0) * pon
-# barra canelada logo acima da calça
-barra = blusa & (Y < 1.045)
-fb = np.where(barra, fb * (0.86 + 0.1 * (np.sin(X * 2 * np.pi / 0.006) > 0)), fb)
+# camisa branca lisa, por dentro da calça
+fb = np.where(cinza, np.clip(v / np.median(v[cinza]), 0.85, 1.08), 1.0)
 out[blusa] = (BLUSA[None, None, :] * fb[..., None])[blusa]
 # vivos escuros da regata (gola e cavas) viram ribana amarela mais escura
 vivo = ehcorpo & ~braco & (Y > 1.0) & (Y < 1.34) & (s < 0.35) & (v < 0.32) & ~rosto
-out[vivo] = (BLUSA * 0.8)[None, :]
+out[vivo] = (BLUSA * 0.95)[None, :]
+# queixo e pescoço: as sombras escuras da textura original caíam na regra dos "vivos"
+out[boca_v] = pele_cor[boca_v]
+# camisa: decote em V (primeiro botão aberto), gola de pontas, carcela e botões
+fr_c = ehcorpo & ~braco & (Z > 0.02) & ~rosto
+v_lim = (Y - 1.228) * 0.55                                     # meia largura do V
+decote_v = fr_c & (np.abs(X) < v_lim) & (Y > 1.228) & (Y < 1.345)
+out[decote_v] = pele_cor[decote_v]
+dg = np.abs(X) - v_lim
+larg_g = 0.020 + 0.012 * suave(1.29 - Y, 0, 0.05)
+gola_c = fr_c & (dg >= 0) & (dg < larg_g) & (Y > 1.238) & (Y < 1.335)
+out[gola_c] = BLUSA[None, :]
+out[fr_c & (np.abs(dg - larg_g) < 0.0012) & (Y > 1.238) & (Y < 1.335)] = cor('#B9B4AC')[None, :]
+out[fr_c & (np.abs(dg) < 0.0010) & (Y > 1.228) & (Y < 1.345)] = cor('#C9C4BC')[None, :]
+out[fr_c & (Y > 1.0) & (Y < 1.228) & (np.abs(X - 0.004) < 0.0009)] = cor('#CFCAC2')[None, :]   # carcela
+for by in (1.045, 1.105, 1.165, 1.215):
+    bt_ = np.hypot(X, Y - by)
+    out[fr_c & (bt_ < 0.0024)] = cor('#E2DED6')[None, :]
+    out[fr_c & (np.abs(bt_ - 0.0024) < 0.0006)] = cor('#A8A39B')[None, :]
 # gola canelada (gola redonda na base do pescoço)
 gola = ehcorpo & ~braco & (Y > 1.27) & (Y < 1.33) & (cinza | (np.abs(Y - 1.305 + 0.25 * np.maximum(Z, 0) ** 1) < 0.01))
 # olhos: branco mais limpo (como no desenho)
@@ -143,28 +200,26 @@ def pinta(m, c, a=1.0):
     a = np.nan_to_num(np.clip(a, 0, 1)) * m
     out[:] = out * (1 - a[..., None]) + np.asarray(c, np.float32)[None, None, :] * a[..., None]
 x = X; y = Y
-w = 0.0262                      # meia largura da boca
+w = 0.0240                      # meia largura da boca
 q = np.clip(np.abs(x) / w, 0, 1.5)
-Uy = 1.4012 + 0.0032 * q ** 2   # borda de cima da boca aberta (cantos sobem: sorriso)
-Ly = 1.3885 + 0.0159 * q ** 2   # borda de baixo
 aa = 0.0006                     # suavização da borda (m)
-dentro = suave(Uy - y, -aa, aa) * suave(y - Ly, -aa, aa) * (q < 1)
-lab_sup = suave(Uy + 0.0032 * (1 - q ** 4) + 0.0008 - y, -aa, aa) * (q < 1.04)
-lab_inf = suave(y - (Ly - 0.0058 * np.clip(1 - q ** 2, 0, 1) ** 0.7 - 0.0007), -aa, aa) * (q < 1.04)
-labios = np.maximum(lab_sup * suave(y - Uy, -aa, aa), lab_inf * suave(Ly - y, -aa, aa))
-contorno_m = np.clip(np.maximum(lab_sup, lab_inf) * 1.0, 0, 1)
+# sorriso discreto, de boca fechada: a linha da boca sobe um pouco nos dois cantos
+My = 1.3958 + 0.0062 * q ** 2.2
+esp_s = 0.0036 * np.clip(1 - q ** 2.5, 0, 1) ** 0.6           # lábio de cima
+esp_i = 0.0052 * np.clip(1 - q ** 2, 0, 1) ** 0.7             # lábio de baixo, mais cheio
+lab_sup = suave(My + esp_s - y, -aa, aa) * suave(y - My, -aa, aa) * (q < 1)
+lab_inf = suave(My - y, -aa, aa) * suave(y - (My - esp_i), -aa, aa) * (q < 1)
+labios = np.maximum(lab_sup, lab_inf)
 # contorno escuro fino (traço do desenho) em volta dos lábios
-envolve = suave(Uy + 0.0032 * (1 - q ** 4) + 0.0018 - y, -aa, aa) * suave(y - (Ly - 0.0058 * np.clip(1 - q ** 2, 0, 1) ** 0.7 - 0.0017), -aa, aa) * (q < 1.1)
-pinta(frente, cor('#5A2418'), envolve * 0.85)
+envolve = suave(My + esp_s + 0.0009 - y, -aa, aa) * suave(y - (My - esp_i - 0.0009), -aa, aa) * (q < 1.06)
+pinta(frente, cor('#5A2418'), envolve * 0.75)
 pinta(frente, cor('#A9483F'), labios)
-hl = suave(y - (Ly - 0.0032), -aa, aa) * suave((Ly - 0.0012) - y, -aa, aa) * (np.abs(x) < 0.01) * (q < 1)
+hl = suave(y - (My - esp_i * 0.75), -aa, aa) * suave((My - esp_i * 0.3) - y, -aa, aa) * (np.abs(x) < 0.009)
 pinta(frente, cor('#C66A60'), hl * 0.5)
-# boca aberta: dentes de cima brancos, fundo escuro, dentes de baixo
-dentes_c = suave((Uy - 0.0062 * np.clip(1 - q ** 2, 0, 1) ** 0.5) - y, 0.0004, -0.0004)
-pinta(frente, cor('#5E1A20'), dentro)
-pinta(frente, cor('#F6F2EA'), dentro * dentes_c)
-lingua = np.hypot(x / 0.014, (y - Ly) / 0.0055) < 1
-pinta(frente, cor('#A8343C'), dentro * lingua * (1 - dentes_c) * 0.9)
+# linha da boca (escura) e covinhas leves nos dois cantos
+pinta(frente, cor('#3E1712'), suave(0.0007 - np.abs(y - My), 0, 0.0004) * (q < 1.08))
+cov_ = np.hypot((np.abs(x) - w * 1.08) / 0.0015, (y - (My + 0.0004)) / 0.0032) < 1
+pinta(frente, cor('#8A5236'), cov_ * 0.4)
 # risquinhos dos cantos do sorriso
 # delineado gatinho: traço grosso sobre a borda de cima do olho (cobre os cílios pintados) + "asa"
 # borda de cima do buraco do olho na malha do rosto (medida na malha, x positivo)
@@ -188,20 +243,23 @@ pinta(frente & (Z > 0.03), cor('#0E0B0D'), np.maximum(linha, asa))
 body_img = Image.fromarray((out.clip(0, 1) * 255).astype(np.uint8))
 
 # =====================================================================
-# JAQUETA JEANS: casca sobre tronco e braços, aberta na frente
+# BLAZER PRETO: casca sobre tronco e braços, aberta em V na frente, até o quadril
 # =====================================================================
 x, y, z = P[:, 0], P[:, 1], P[:, 2]
-w_aberta = 0.040 + 0.040 * suave(y, 1.19, 1.31)
-sel = (TV == 'corpo') & (np.abs(x) < 0.305) & (y > 1.0) & ~((y > 1.30) & (np.abs(x) < 0.085)) & (y < 1.36)
+w_aberta = 0.006 + 0.076 * suave(y, 1.085, 1.30) + 0.026 * suave(1.07 - y, 0, 0.12)
+sel = (TV == 'corpo') & (np.abs(x) < 0.53) & (y > 0.93) & ~((y > 1.31) & (np.abs(x) < 0.095)) & (y < 1.36)
+sel &= ~((z > 0.0) & (np.abs(x) < w_aberta) & (y < 1.36))
 tri = I[sel[I].all(1)]
 # só a maior parte conectada (sem pedacinhos soltos)
 usados = np.unique(tri)
-off = np.where(np.abs(x) > 0.2, 0.006, 0.0075).astype(np.float32)
-# manga bufante: franzida no ombro e na barra, cheia no meio
-off += (0.018 * np.maximum(np.sin(np.pi * np.clip((np.abs(x) - 0.165) / 0.135, 0, 1)), 0) ** 1.3 * (np.abs(x) > 0.165)).astype(np.float32)
+off = np.where(np.abs(x) > 0.2, 0.010, 0.0125).astype(np.float32)
 off += 0.004 * suave(-z, 0.0, 0.06) * (np.abs(x) < 0.2)          # um pouco mais solta nas costas
-off += 0.006 * suave(1.08 - y, 0, 0.06) * (np.abs(x) < 0.2)       # barra mais solta (por cima da calça)
+off += 0.010 * suave(1.02 - y, 0, 0.07) * (np.abs(x) < 0.2)       # barra mais solta (por cima do quadril)
 Nj = normais(P, I)
+# vértices repetidos nas costuras do UV: mesma normal, senão a casca abre uma fresta
+_, grp = np.unique(np.round(P, 4), axis=0, return_inverse=True)
+grp = grp.ravel(); acc_n = np.zeros((grp.max() + 1, 3)); np.add.at(acc_n, grp, Nj)
+Nj = acc_n[grp] / np.maximum(np.linalg.norm(acc_n[grp], axis=1, keepdims=True), 1e-9)
 JP = P + Nj * off[:, None]
 remap = -np.ones(len(P), np.int64); remap[usados] = np.arange(len(usados))
 jP = JP[usados]; jN = Nj[usados]; jUV = UV[usados]; jJ = J[usados]; jW = Wt[usados]
@@ -216,31 +274,100 @@ borda = [k for k, c in arestas.items() if c == 1]
 bv = np.unique(np.array(borda))
 for i in bv:
     px_, py_, pz_ = jP[i]
-    if abs(px_) > 0.26: jP[i, 0] = np.sign(px_) * 0.305
-    elif py_ < 1.06 and abs(px_) < 0.21: jP[i, 1] = 1.008
+    if abs(px_) > 0.40: jP[i, 0] = np.sign(px_) * 0.537
+    elif py_ < 0.99 and abs(px_) < 0.21: jP[i, 1] = 0.938
+    elif pz_ > 0.0 and abs(px_) < 0.10 and py_ < 1.30:
+        jP[i, 0] = np.sign(px_) * (0.006 + 0.076 * suave(py_, 1.085, 1.30) + 0.026 * suave(1.07 - py_, 0, 0.12))
+pp = jP
+cand = lambda i: pp[i, 1] > 1.09 and abs(pp[i, 0]) < 0.13 and not (pp[i, 1] < 1.27 and pp[i, 2] < 0)
+adj = {}
+for a, b in borda:
+    if cand(a) and cand(b):
+        adj.setdefault(a, []).append(b); adj.setdefault(b, []).append(a)
+# maior caminho entre pontas
+vist = set(); melhor = []
+for s0 in adj:
+    if s0 in vist: continue
+    # componente
+    comp_v = []; st = [s0]
+    while st:
+        u = st.pop()
+        if u in vist: continue
+        vist.add(u); comp_v.append(u); st += adj[u]
+    pontas = [u for u in comp_v if len(adj[u]) == 1] or comp_v[:1]
+    cam = [pontas[0]]; prev = None
+    while True:
+        nx = [u for u in adj[cam[-1]] if u != prev and u not in cam]
+        if not nx: break
+        prev = cam[-1]; cam.append(nx[0])
+    if len(cam) > len(melhor): melhor = cam
+cam = np.array(melhor)
+print('gola: pontos', len(cam))
+for _ in range(4):   # alisa a linha da gola
+    sm = jP[cam].copy(); sm[1:-1] = (jP[cam][:-2] + 2 * jP[cam][1:-1] + jP[cam][2:]) / 4; jP[cam] = sm
+cp = jP[cam]
+cz0 = -0.01
+o = np.c_[cp[:, 0], np.zeros(len(cp)), cp[:, 2] - cz0]
+o /= np.maximum(np.linalg.norm(o, axis=1, keepdims=True), 1e-6)
+frente_g = suave(o[:, 2], -0.4, 0.6)
+up = np.array([0, 1, 0])
+lat = np.c_[np.sign(cp[:, 0]), np.zeros(len(cp)), np.zeros(len(cp))]
+bn = suave(cp[:, 1], 1.27, 1.31)[:, None]              # 1 = gola no pescoço, 0 = lapela no peito
+larg = suave(cp[:, 1], 1.10, 1.21)[:, None]            # a lapela afina até sumir no botão
+g1 = cp + up * (0.016 + 0.010 * frente_g)[:, None] + o * 0.004
+g2 = cp + up * (0.006 + 0.004 * frente_g)[:, None] + o * (0.016 + 0.016 * frente_g)[:, None]
+l1 = cp + o * 0.004 + lat * 0.003 * larg
+l2 = cp + o * 0.007 + lat * 0.030 * larg + up * 0.004 * larg
+c1 = g1 * bn + l1 * (1 - bn)
+c2 = g2 * bn + l2 * (1 - bn)
+n0 = len(jP); m = len(cam)
+jP = np.vstack([jP, c1, c2]); jN = np.vstack([jN, o, o]); jUV = np.vstack([jUV, jUV[cam], jUV[cam]])
+jJ = np.vstack([jJ, jJ[cam], jJ[cam]]); jW = np.vstack([jW, jW[cam], jW[cam]])
+gi = []
+for k in range(m - 1):
+    a0, a1 = cam[k], cam[k + 1]; b0, b1 = n0 + k, n0 + k + 1; d0, d1 = n0 + m + k, n0 + m + k + 1
+    gi += [[a0, a1, b1], [a0, b1, b0], [b0, b1, d1], [b0, d1, d0]]
+jI = np.vstack([jI, np.array(gi)])
 
-
-# ---- textura da blusa branca (mesmo UV do corpo) ----
+# ---- textura do blazer (mesmo UV do corpo) ----
 JW = 1024
 Jm, jcov = mapa_uv(UV, I, np.c_[P, N[:, 2]], JW, tri_ok=(TV[I[:, 0]] == 'corpo'))
 Jm = preencher(Jm, jcov)
 X, Y, Z = Jm[..., 0], Jm[..., 1], Jm[..., 2]
 AX = np.abs(X)
 ruido = blur(rng.normal(0, 1, (JW, JW)).astype(np.float32), 0.8); ruido /= ruido.std()
-dobra = blur(rng.normal(0, 1, (JW, JW)).astype(np.float32), 14); dobra /= dobra.std()
-jt = BLUSA[None, None, :] * (1 + 0.015 * ruido[..., None] + 0.025 * dobra[..., None])
+manchas = blur(rng.normal(0, 1, (JW, JW)).astype(np.float32), 16); manchas /= manchas.std()
+PRETO_B = cor('#222228')
+jt = PRETO_B[None, None, :] * (1 + 0.035 * ruido[..., None] + 0.03 * manchas[..., None])
 def mix(mask, c, a=1.0):
     global jt
     a = np.clip(mask * a, 0, 1)[..., None]
     jt = jt * (1 - a) + np.asarray(c)[None, None, :] * a
-SOMB = cor('#C9C2BA')
-# franzido da manga (linhas finas no ombro e na barra) e barra
-for x0 in (0.168, 0.297):
-    mix(AX > 0.16, SOMB, np.exp(-((AX - x0) / 0.004) ** 2) * (0.6 + 0.4 * (np.sin(Y * 2 * np.pi / 0.008) > 0)))
-mix(AX > 0.2, SOMB, (np.sin(np.arctan2(Y - 1.34, Z) * 22) > 0.6) * 0.25 * np.clip((AX - 0.18) / 0.05, 0, 1))
-mix(AX < 0.2, SOMB, np.exp(-((Y - 1.012) / 0.002) ** 2) * 0.6)   # barra por dentro da calça
+def linha_em(d, larg=0.0013):
+    return suave(larg - np.abs(d), 0, 0.0005)
+tronco = AX < 0.2
+frente_j = tronco & (Z > 0.0)
+wa = 0.006 + 0.076 * suave(Y, 1.085, 1.30) + 0.026 * suave(1.07 - Y, 0, 0.12)
+db = AX - wa
+# lapela (cetim um pouco mais claro) e a borda da abertura
+lap_w = 0.030 * suave(Y, 1.10, 1.22)
+mix(frente_j & (db > 0) & (db < lap_w) & (Y > 1.09), cor('#2E2E36'), 0.9)
+mix(frente_j & (Y > 1.09), cor('#111114'), linha_em(db - lap_w, 0.0012) * (lap_w > 0.004))
+mix(frente_j, cor('#111114'), linha_em(db - 0.0008, 0.0012))
+# botão na cintura (um só, como blazer feminino)
+bt = np.hypot(X - 0.012, Y - 1.072)
+mix(frente_j, cor('#0C0C0E'), suave(0.0058 - bt, 0, 0.0008))
+mix(frente_j, cor('#55555E'), linha_em(bt - 0.0046, 0.0008))
+# lapelas dos bolsos e pences
+for sx_ in (-1, 1):
+    mix(frente_j & (np.abs(X - sx_ * 0.10) < 0.032), cor('#121216'), linha_em(Y - 1.0, 0.0014))
+    mix(frente_j & (Y > 1.0) & (Y < 1.16), cor('#1A1A1F'), linha_em(X - sx_ * 0.065, 0.0011) * 0.7)
+# costura dos ombros e punhos
+mix(np.ones_like(AX, bool), cor('#141418'), linha_em(AX - 0.17, 0.0012) * (Y > 1.2) * 0.8)
+mix(AX > 0.505, cor('#161619'), 0.25)
+mix(np.ones_like(AX, bool), cor('#0F0F12'), linha_em(AX - 0.505, 0.0012))
+mix(tronco & (Y < 0.955), cor('#141418'), 0.25)
 jac_img = Image.fromarray((jt.clip(0, 1) * 255).astype(np.uint8))
-# decote redondo (gola careca): a pele do colo aparece acima da blusa
 
 # =====================================================================
 # CABELO NOVO: liso, preto e comprido, risca de lado e franja varrida
@@ -313,7 +440,7 @@ for j, p in enumerate(phis):
     dirp = np.array([math.sin(math.radians(p)), 0, math.cos(math.radians(p))])
     for k, yy in enumerate(ys):
         conv = rho0 * (1 - 0.12 * suave(y0 - yy, 0, 0.09))
-        folga = 0.016 + 0.026 * suave(1.35 - yy, 0, 0.05) * suave(yy, 1.20, 1.26) + 0.012 * suave(1.24 - yy, 0, 0.03)
+        folga = 0.022 + 0.026 * suave(1.35 - yy, 0, 0.05) * suave(yy, 1.20, 1.26) + 0.012 * suave(1.24 - yy, 0, 0.03)
         et = env_tr(np.array([yy]), np.array([p]))[0]
         R[NS + k, j] = max(conv, et + folga); Rmin[NS + k, j] = et + folga * 0.85
         DIR[NS + k, j] = dirp; BASE[NS + k, j] = (0, yy, Cc[2]); valid[NS + k, j] = True
@@ -362,7 +489,7 @@ fio = blur(rng.normal(0, 1, (HH, HW)).astype(np.float32), 0.8)
 fio = ndimage.uniform_filter1d(fio, 60, axis=0, mode='wrap')
 fio = (fio - fio.min()) / (fio.max() - fio.min())
 brilho = np.exp(-((np.arange(HH)[:, None] / HH - 0.30) / 0.07) ** 2) * 0.5
-hc = CABELO[None, None, :] * (0.7 + 0.75 * fio[..., None]) + cor('#6B4630')[None, None, :] * (brilho * fio)[..., None]
+hc = CABELO[None, None, :] * (0.7 + 0.75 * fio[..., None]) + cor('#3B3A48')[None, None, :] * (brilho * fio)[..., None]
 hair_img = Image.fromarray((hc.clip(0, 1) * 255).astype(np.uint8))
 
 # =====================================================================
@@ -418,6 +545,65 @@ colP = np.array(colP, np.float32); colN = np.array(colN, np.float32); colI = np.
 colJ = np.array(colJ, np.uint8); colW = np.array(colW, np.float32)
 
 # =====================================================================
+# ÓCULOS DE GRAU: armação preta fina, estilo gatinho (canto de fora puxado para cima), ponte e hastes
+# =====================================================================
+corpoP = P[TV == 'corpo']
+def zfrente(px, py, raio=0.006):
+    m_ = (np.abs(corpoP[:, 0] - px) < raio) & (np.abs(corpoP[:, 1] - py) < raio) & (corpoP[:, 2] > 0.02)
+    return corpoP[m_, 2].max() if m_.any() else 0.08
+def xlado(py, pz, raio=0.008):
+    m_ = (np.abs(corpoP[:, 1] - py) < raio) & (np.abs(corpoP[:, 2] - pz) < raio)
+    return np.abs(corpoP[m_, 0]).max() if m_.any() else 0.075
+ocP, ocI = [], []
+def tubo_oc(pts, r=0.0019, fechado=False, ns=8):
+    pts = np.asarray(pts, float)
+    if fechado: pts = np.vstack([pts, pts[:1]])
+    b0 = len(ocP)
+    for i_ in range(len(pts)):
+        d_ = pts[min(i_ + 1, len(pts) - 1)] - pts[max(i_ - 1, 0)]; d_ /= max(np.linalg.norm(d_), 1e-9)
+        u_ = np.cross(d_, [0, 0, 1.0]); u_ = u_ / np.linalg.norm(u_) if np.linalg.norm(u_) > 1e-6 else np.array([0, 1, 0.0]); v_ = np.cross(d_, u_)
+        for k_ in range(ns):
+            an = 2 * math.pi * k_ / ns; ocP.append(pts[i_] + (u_ * math.cos(an) + v_ * math.sin(an) * 1.3) * r)
+    for i_ in range(len(pts) - 1):
+        for k_ in range(ns):
+            k2 = (k_ + 1) % ns; p0 = b0 + i_ * ns
+            ocI.extend([[p0 + k_, p0 + ns + k_, p0 + ns + k2], [p0 + k_, p0 + ns + k2, p0 + k2]])
+ZL = max(zfrente(0.012, 1.462), zfrente(0.043, 1.476), zfrente(0.043, 1.436)) + 0.006
+def z_aro(px, py):
+    zc = ZL - 0.016 * max((abs(px) - 0.012) / 0.058, 0) ** 2         # acompanha a curva do rosto
+    return max(zc, zfrente(px, py, 0.005) + 0.0045)
+CXo, CYo, HWo, HHo = 0.0425, 1.4555, 0.0280, 0.0190
+def gatinho(a_, sx):
+    # oval; no alto do lado de fora (perto de 35°) o aro é puxado para cima e para fora, em ponta
+    ar = math.radians(a_)
+    ponta = max(math.cos(math.radians(a_ - 36)), 0) ** 14
+    px = CXo + HWo * math.cos(ar) + 0.0068 * ponta
+    py = CYo + HHo * math.sin(ar) + 0.0110 * ponta - 0.0015 * max(math.sin(ar), 0) * (1 - ponta)   # alto de dentro mais reto
+    return sx * px, py
+for sx in (-1, 1):
+    aro = []
+    for a_ in np.linspace(0, 360, 72, endpoint=False):          # aro oval com a pontinha de gatinho
+        px, py = gatinho(a_, sx)
+        aro.append([px, py, z_aro(px, py)])
+    tubo_oc(aro, fechado=True)
+    # haste: da borda de fora, rente à lateral da cabeça, até atrás da orelha
+    x0, y0 = gatinho(18, sx); z0 = z_aro(x0, y0)   # a haste sai logo abaixo da ponta
+    hs = []
+    for t_ in np.linspace(0, 1, 9):
+        zz = z0 + (-0.030 - z0) * t_
+        yy = y0 - 0.004 * t_ ** 2
+        xx = max(abs(x0) + 0.006 * t_, xlado(yy, zz) + 0.0045)
+        hs.append([sx * xx, yy, zz])
+    hs.append([sx * (hs[-1][0] * sx - 0.002), yy - 0.014, -0.040])   # ponta curva atrás da orelha
+    tubo_oc(hs, r=0.0016)
+pz_ = max(zfrente(0.0, 1.462), ZL) + 0.002
+tubo_oc([[-(CXo - HWo) - 0.001, CYo + 0.006, z_aro(CXo - HWo, CYo + 0.006)], [0, CYo + 0.009, pz_], [(CXo - HWo) + 0.001, CYo + 0.006, z_aro(CXo - HWo, CYo + 0.006)]], r=0.0018)   # ponte
+ocP = np.array(ocP, np.float32); ocI = np.array(ocI)
+ocN = ocP - np.array([0, CYo, 0.0], np.float32); ocN[:, 1] *= 0.3
+ocJ = np.tile([JI['Head'], 0, 0, 0], (len(ocP), 1)).astype(np.uint8); ocW = np.tile([1.0, 0, 0, 0], (len(ocP), 1)).astype(np.float32)
+print('oculos: vertices', len(ocP), 'ZL', round(ZL, 4))
+
+# =====================================================================
 # MONTA O GLB
 # =====================================================================
 def jpg(im, q=88):
@@ -431,14 +617,20 @@ def add_img(data, nome):
     g.j['textures'].append({'source': len(g.j['images']) - 1, 'sampler': 0})
     return len(g.j['textures']) - 1
 t_corpo = add_img(jpg(body_img), 'corpo')
-t_normal = add_img(jpg(Image.open(io.BytesIO(normal_png)).convert('RGB'), 90), 'corpo_normal')
+# mapa de normais: boca e queixo lisos (o relevo da boca aberta da Michelle aparecia sob a boca fechada)
+nimg = np.asarray(Image.open(io.BytesIO(normal_png)).convert('RGB').resize((W, W), Image.LANCZOS), np.float32)
+liso = blur(boca_v.astype(np.float32), 2.0)[..., None]
+nimg = nimg * (1 - liso) + np.array([128, 128, 255], np.float32) * liso
+t_normal = add_img(jpg(Image.fromarray(nimg.clip(0, 255).astype(np.uint8)), 90), 'corpo_normal')
 t_jaq = add_img(jpg(jac_img, 86), 'jaqueta')
 t_cab = add_img(jpg(hair_img, 85), 'cabelo')
 g.j['materials'] = [
     {'name': 'Corpo', 'doubleSided': True, 'pbrMetallicRoughness': {'baseColorTexture': {'index': t_corpo}, 'metallicFactor': 0.0, 'roughnessFactor': 0.78}, 'normalTexture': {'index': t_normal}},
-    {'name': 'Blusa', 'doubleSided': True, 'pbrMetallicRoughness': {'baseColorTexture': {'index': t_jaq}, 'metallicFactor': 0.0, 'roughnessFactor': 0.9}},
+    {'name': 'Blazer', 'doubleSided': True, 'pbrMetallicRoughness': {'baseColorTexture': {'index': t_jaq}, 'metallicFactor': 0.0, 'roughnessFactor': 0.85}},
     {'name': 'Cabelo', 'doubleSided': True, 'pbrMetallicRoughness': {'baseColorTexture': {'index': t_cab}, 'metallicFactor': 0.0, 'roughnessFactor': 0.55}},
     {'name': 'Ouro', 'doubleSided': True, 'pbrMetallicRoughness': {'baseColorFactor': [float(c) for c in cor('#E5B64E') ** 2.2] + [1.0], 'metallicFactor': 0.85, 'roughnessFactor': 0.3}},
+    {'name': 'Oculos', 'doubleSided': True, 'pbrMetallicRoughness': {'baseColorFactor': [float(c) for c in cor('#141215') ** 2.2] + [1.0], 'metallicFactor': 0.0, 'roughnessFactor': 0.3}},
+    {'name': 'Sapato', 'doubleSided': True, 'pbrMetallicRoughness': {'baseColorFactor': [float(c) for c in cor('#141216') ** 2.2] + [1.0], 'metallicFactor': 0.1, 'roughnessFactor': 0.22}},
 ]
 g.j.pop('extensionsUsed', None); g.j.pop('extensionsRequired', None)
 pr['attributes']['POSITION'] = g.add_acc(P.astype(np.float32), 'VEC3', 34962, minmax=True)   # (sobrancelhas mais finas)
@@ -453,7 +645,12 @@ def prim(Pv, Nv, UVv, Jv, Wv, Iv, mat_i):
         'WEIGHTS_0': g.add_acc(Wv.astype(np.float32), 'VEC4', 34962)},
         'indices': g.add_acc(Iv.reshape(-1).astype(np.uint16 if len(Pv) < 65535 else np.uint32), 'SCALAR', 34963), 'material': mat_i}
 jN = jN / np.maximum(np.linalg.norm(jN, axis=1, keepdims=True), 1e-6)
-g.j['meshes'][0]['primitives'] += [prim(jP, jN, jUV, jJ, jW, jI, 1), prim(hv, hN, hUV, hJ, hWt, hI, 2), prim(colP, colN, np.zeros((len(colP), 2), np.float32), colJ, colW, colI, 3)]
+# sapatos: primitiva própria (preto envernizado)
+sv = np.unique(sap_tri); rm_ = -np.ones(len(P), np.int64); rm_[sv] = np.arange(len(sv))
+sI = rm_[sap_tri]; sP = P[sv]; sN = normais(P, sap_tri)[sv]
+sN = sN / np.maximum(np.linalg.norm(sN, axis=1, keepdims=True), 1e-6)
+sapato_prim = prim(sP, sN, UV[sv], J[sv], Wt[sv], sI, 5)
+g.j['meshes'][0]['primitives'] += [prim(jP, jN, jUV, jJ, jW, jI, 1), prim(hv, hN, hUV, hJ, hWt, hI, 2), prim(colP, colN, np.zeros((len(colP), 2), np.float32), colJ, colW, colI, 3), prim(ocP, ocN / np.linalg.norm(ocN, axis=1, keepdims=True), np.zeros((len(ocP), 2), np.float32), ocJ, ocW, ocI, 4), sapato_prim]
 g.j.pop('animations', None)
 tmp = SAIDA + '.tmp.glb'
 g.save(tmp)
