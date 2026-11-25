@@ -188,10 +188,10 @@ CT.PREDIOS = [
     pergunta:
       "Agora quero ver se você aprendeu! Quando alguém faz um pedido de informação ao governo, qual é o prazo para receber uma resposta?",
     alternativas: [
-      "Até 5 dias, sem possibilidade de prorrogação.",
-      "Até 60 dias, contados do pedido.",
+      "Até 5 dias, sem nenhuma possibilidade de prorrogação, mesmo com justificativa.",
+      "Até 60 dias corridos, contados a partir da data em que o pedido foi feito.",
       "Até 20 dias, podendo ser prorrogado por mais 10 dias, com justificativa.",
-      "Não existe prazo para responder.",
+      "Não existe prazo: o governo responde quando tiver tempo e disponibilidade.",
     ],
     correta: 2,
     explicacao:
@@ -220,10 +220,10 @@ CT.PREDIOS = [
     pergunta:
       "Quais tipos de manifestação podem ser registrados na Ouvidoria?",
     alternativas: [
-      "Apenas denúncias anônimas contra servidores.",
+      "Apenas denúncias anônimas contra servidores e secretários.",
       "Reclamações, denúncias, sugestões, elogios e solicitações.",
       "Somente reclamações feitas pessoalmente, com testemunhas.",
-      "Apenas pedidos de emprego e de estágio.",
+      "Apenas pedidos de emprego, de estágio e inscrições em concursos.",
     ],
     correta: 1,
     explicacao:
@@ -254,9 +254,9 @@ CT.PREDIOS = [
       "O que significa exercer o controle social?",
     alternativas: [
       "Participar e acompanhar como a Prefeitura utiliza o dinheiro público.",
-      "Deixar toda a fiscalização apenas nas mãos dos políticos.",
-      "Decidir sozinho como o dinheiro da cidade deve ser gasto.",
-      "Cuidar apenas dos problemas da própria casa.",
+      "Deixar toda a fiscalização dos gastos apenas nas mãos dos políticos.",
+      "Decidir sozinho, sem consultar ninguém, como o dinheiro deve ser gasto.",
+      "Cuidar apenas dos problemas da própria casa, sem se envolver com a cidade.",
     ],
     correta: 0,
     explicacao:
@@ -321,7 +321,7 @@ CT.PREDIOS = [
     alternativas: [
       "Portal Nacional de Contratações Públicas (PNCP).",
       "Mural de avisos da recepção da Prefeitura.",
-      "Redes sociais do prefeito.",
+      "Perfil pessoal do prefeito nas redes sociais.",
       "Jornal escolhido pela empresa que venceu a licitação.",
     ],
     correta: 0,
@@ -352,9 +352,9 @@ CT.PREDIOS = [
     pergunta:
       "Antes de pagar por uma etapa de uma obra pública, o que a Prefeitura precisa fazer?",
     alternativas: [
-      "Pagar todo o valor antes mesmo de a obra começar.",
-      "Esperar a inauguração para conferir se a obra foi feita.",
-      "Pagar o valor solicitado pela empresa, sem verificar o serviço.",
+      "Pagar todo o valor combinado antes mesmo de a obra começar a ser feita.",
+      "Esperar a inauguração da obra para só então conferir se ela foi feita.",
+      "Pagar o valor que a empresa pedir, sem verificar se o serviço foi feito.",
       "Conferir se o serviço foi realmente realizado antes de fazer o pagamento.",
     ],
     correta: 3,
@@ -385,10 +385,10 @@ CT.PREDIOS = [
     pergunta:
       "Qual destes formatos é o mais adequado para publicar dados abertos?",
     alternativas: [
-      "PDF escaneado de um documento impresso.",
-      "Foto da tela do sistema.",
+      "PDF escaneado de um documento impresso e assinado.",
+      "Foto da tela do sistema, tirada pelo celular.",
       "Arquivo CSV, estruturado e legível por máquina.",
-      "Imagem JPG de uma tabela.",
+      "Imagem JPG de uma tabela, em alta resolução.",
     ],
     correta: 2,
     explicacao:
@@ -420,10 +420,10 @@ CT.BOSS = {
       pergunta:
         "Vamos começar! Eu adoro esconder informações! Mas me diga: segundo a Lei de Acesso à Informação, qual é a regra para as informações públicas?",
       alternativas: [
-        "O governo pode esconder todas as informações, se quiser.",
+        "O governo pode esconder todas as informações, se quiser, sem precisar dar nenhuma explicação à população.",
         "As informações devem ser divulgadas para todos. O sigilo só acontece em situações especiais previstas em lei.",
-        "Somente os servidores públicos podem conhecer essas informações.",
-        "Só podemos conhecer as informações quando o prefeito autorizar.",
+        "Somente os servidores públicos podem conhecer essas informações. O cidadão comum não tem direito de acesso.",
+        "Só podemos conhecer as informações quando o prefeito autorizar. Sem a autorização dele, tudo fica em sigilo.",
       ],
       correta: 1,
       explicacoesErro: [
@@ -439,9 +439,9 @@ CT.BOSS = {
         "Argh! Vamos ver se você sabe mesmo! Eu adoro esconder informações e deixar as pessoas esperando! Mas, quando alguém pede uma informação ao governo e ela não está disponível, qual é o prazo para receber uma resposta?",
       alternativas: [
         "Até 20 dias, podendo ganhar mais 10 dias se houver uma justificativa.",
-        "Até 90 dias, sem precisar explicar a demora.",
-        "Não existe prazo. O governo responde quando quiser.",
-        "Até 5 dias, e depois o pedido desaparece!",
+        "Até 90 dias, sem precisar explicar a demora para quem fez o pedido.",
+        "Não existe prazo. O governo responde quando quiser, sem pressa alguma.",
+        "Até 5 dias. Depois disso, o pedido é arquivado e simplesmente desaparece!",
       ],
       correta: 0,
       explicacoesErro: [
@@ -456,10 +456,10 @@ CT.BOSS = {
       pergunta:
         "Grrrr! Você chegou longe, mas ainda não acabou! Imagine que uma criança quer descobrir quanto dinheiro a Prefeitura gastou para reformar uma escola e se a obra foi realizada de verdade. O que ela pode fazer?",
       alternativas: [
-        "Desistir, porque ninguém pode saber quanto dinheiro foi gasto na obra.",
-        "Esperar até o final do ano para descobrir essas informações.",
+        "Desistir, porque ninguém pode saber quanto dinheiro foi gasto na obra. Essas informações ficam guardadas só com a Prefeitura e a empresa contratada.",
+        "Esperar até o final do ano para descobrir essas informações. Antes disso, nada é divulgado e não adianta procurar no site nem perguntar na Prefeitura.",
         "Consultar o Portal da Transparência. Se não encontrar tudo, pode pedir a informação pela LAI e, se perceber algo errado, registrar uma manifestação na Ouvidoria.",
-        "Pedir a informação somente se tiver autorização do diretor da escola.",
+        "Pedir a informação somente se tiver autorização do diretor da escola. Sem essa autorização por escrito, a Prefeitura não é obrigada a responder.",
       ],
       correta: 2,
       explicacoesErro: [
