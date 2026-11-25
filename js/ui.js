@@ -293,13 +293,14 @@ window.CT = window.CT || {};
       i += 3;
       setParas(el, text.slice(0, i));
       if (i % 9 === 0) CT.Audio.play("type");
-      if (i >= text.length) { clearInterval(typer); D.typing = false; setParas(el, text); }
+      if (i >= text.length) { clearInterval(typer); D.typing = false; setParas(el, text); marcarRolagem(); }
     }, 22);
   }
   function finishTyping() {
     if (!D.typing) return false;
     clearInterval(typer); D.typing = false;
     const el = document.querySelector("#dialog .dlg-text"); if (el) setParas(el, D.full);
+    marcarRolagem();
     return true;
   }
 
@@ -383,7 +384,15 @@ window.CT = window.CT || {};
       mostrarFim(el);
     }
     el.querySelector(".dlg-peek").setAttribute("aria-pressed", String(el.classList.contains("recolhido")));
+    marcarRolagem();
   }
+  /* miolo com mais conteúdo abaixo: classe "mais" (a borda de baixo esmaece) */
+  function marcarRolagem() {
+    const b = document.querySelector("#dialog .dlg-body");
+    if (b) b.classList.toggle("mais", b.scrollTop + b.clientHeight < b.scrollHeight - 4);
+  }
+  $("dialog").addEventListener("scroll", marcarRolagem, true);
+  addEventListener("resize", () => { if (D.open) marcarRolagem(); });
   // caixa com rolagem (celular deitado): leva até a explicação da resposta
   function mostrarFim(el) {
     const b = el.querySelector(".dlg-body"), f = el.querySelector(".feedback");

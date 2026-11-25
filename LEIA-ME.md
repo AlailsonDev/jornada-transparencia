@@ -50,6 +50,10 @@ O jogo funciona no navegador do celular e do tablet, com os mesmos arquivos. A t
 | Botão ☰ | Menu de pausa (o mesmo do ESC) |
 | Minimapa | Toque para abrir o mapa ampliado |
 | ✕ no diálogo | Fechar o diálogo (o mesmo do ESC) |
+| 👁 no diálogo | Espiar o cenário: recolhe a caixa a uma barra. Toque na barra (ou no 👁) para mostrar o texto de novo |
+
+- **Diálogos no celular deitado:** a caixa de conversa fica na lateral direita e a câmera mostra os personagens na parte livre, à esquerda. Falas que não cabem na altura da tela são divididas em mais páginas (o texto é o mesmo). Placar, minimapa e ajuda saem da frente enquanto a conversa está aberta.
+- **Textos longos (todas as telas):** a caixa de diálogo nunca passa da altura da tela. O cabeçalho e os botões ficam fixos e a pergunta, as alternativas e a explicação rolam dentro da caixa; quando há mais conteúdo abaixo, a borda de baixo esmaece.
 
 - **Na horizontal:** no celular, o jogo pede para girar o aparelho. No tablet funciona nas duas posições.
 - **Tela cheia:** no Android e no iPad, o jogo entra em tela cheia ao começar a partida. No iPhone, o Safari não permite: use **Compartilhar → Adicionar à Tela de Início**; aberto pelo ícone, o jogo ocupa a tela toda. No Android, **Adicionar à tela inicial** faz o mesmo.
