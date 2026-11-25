@@ -770,3 +770,46 @@ body.touch #prompt { white-space: normal; text-align: center; justify-content: c
 #dino-banner .db-l2 { font-size: 46px; fill: #fff; stroke-width: 11px; }
 #dino-banner .db-pts { display: inline-block; margin-top: 2px; padding: 6px 16px; border-radius: 999px; background: #18B26B; color: #fff; font: 800 clamp(0.9rem, 2.2vw, 1.2rem) var(--f-display); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3); }
 @media (max-height: 520px) { #dino-banner { top: 4vh; width: min(640px, 80vw); } }
+
+/* botão de espiar o cenário (no cabeçalho do diálogo; só no toque) */
+.dlg-peek { flex: none; height: 38px; min-width: 38px; padding: 0 9px; margin-left: 6px; border: 0; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: rgba(0, 0, 0, 0.22); color: #fff; cursor: pointer; font: 800 0.72rem var(--f-display); letter-spacing: 0.08em; }
+.dlg-peek svg { width: 20px; height: 20px; }
+.dlg-peek span { display: none; }
+#dialog.recolhido .dlg-peek span { display: inline; }
+#dialog.recolhido .dlg-peek { background: rgba(255, 255, 255, 0.25); }
+/* recolhido: só a barra do cabeçalho; tocar nela mostra o texto de novo */
+#dialog.recolhido .dlg-body, #dialog.recolhido .dlg-foot { display: none; }
+#dialog.recolhido { padding-bottom: 0; cursor: pointer; }
+#dialog.recolhido .dlg-step { display: none; }
+
+/* =====================================================================
+ * DIÁLOGO NA LATERAL (celular deitado / telas baixas)
+ * A caixa fica à direita e a câmera mostra o cenário à esquerda.
+ * Falas longas viram mais páginas (js/ui.js); pergunta e respostas rolam
+ * dentro da caixa, com o cabeçalho e os botões sempre à vista.
+ * (mesmo critério de LATERAL em js/ui.js)
+ * ===================================================================== */
+@media (max-height: 520px) and (orientation: landscape) {
+  #dialog, body.boss-fight #dialog {
+    --dlg-w: min(56vw, 540px);
+    left: auto; right: max(8px, env(safe-area-inset-right, 0px)); top: auto; bottom: 6px; transform: none;
+    width: var(--dlg-w); max-height: calc(100vh - 12px); max-height: calc(100dvh - 12px);
+    display: flex; flex-direction: column; overflow: hidden; padding-bottom: 10px;
+    animation: rise-lado 0.35s cubic-bezier(.2,.9,.3,1.2);
+  }
+  #dialog[hidden] { display: none; }
+  #dialog .dlg-head { flex: none; position: static; }
+  #dialog .dlg-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 2px; }
+  #dialog .dlg-foot { flex: none; }
+  #dialog .dlg-text { max-width: none; }
+  #dialog .options, body.boss-fight #dialog .options { grid-template-columns: 1fr; gap: 6px; }
+  #dialog .dlg-role { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #dialog .dlg-head > div:nth-child(2) { min-width: 0; }
+  #dialog.recolhido { padding-bottom: 0; }
+  /* com a conversa aberta, placar e minimapa saem da frente do cenário */
+  body.dlg-open #map-panel, body.dlg-open #score-panel, body.dlg-open #help { visibility: hidden; }
+  body.dlg-open #toast { left: calc((100vw - min(56vw, 540px)) / 2); max-width: calc(100vw - min(56vw, 540px) - 40px); }
+  /* batalha: barra de vida do chefe à esquerda, acima do cenário livre */
+  body.boss-fight #boss-bar { --bx: 0px; left: max(8px, env(safe-area-inset-left, 0px)); width: calc(100vw - min(56vw, 540px) - 32px); }
+}
+@keyframes rise-lado { from { transform: translateX(30px); opacity: 0; } }

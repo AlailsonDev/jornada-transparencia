@@ -1176,6 +1176,14 @@ window.CT = window.CT || {};
         const dx = npc.x - P.x, dz = npc.z - P.z, dl = Math.hypot(dx, dz) || 1;
         off = new THREE.Vector3((dz / dl) * 3.6 - (dx / dl) * 1.6, 1.5, (-dx / dl) * 3.6 - (dz / dl) * 1.6);
       }
+      // celular deitado: a caixa fica à direita; a "lente" centraliza a cena na
+      // parte livre (à esquerda) e a câmera se afasta um pouco para caber os dois
+      const dlg = document.getElementById("dialog");
+      cam.lensX = 0; cam.lensY = 0;
+      if (UI.dialog.lateral() && !dlg.hidden && !dlg.classList.contains("recolhido")) {
+        const r = dlg.getBoundingClientRect();
+        if (r.left > innerWidth * 0.35) { cam.lensX = innerWidth / 2 - r.left / 2; off.multiplyScalar(1.3); }
+      }
       const tp = mid.clone().add(off);
       const tl = mid.clone().add(new THREE.Vector3(0, -0.5, 0));
       cam.pos.lerp(tp, 1 - Math.exp(-3.5 * dt)); cam.look.lerp(tl, 1 - Math.exp(-4 * dt));
@@ -1204,7 +1212,7 @@ window.CT = window.CT || {};
     }
     camera.position.copy(cam.pos);
     camera.lookAt(cam.look);
-    if (cam.mode === "boss" || cam.mode === "select") updateLens(cam.lensX || 0, cam.lensY || 0, dt);
+    if (cam.mode === "boss" || cam.mode === "select" || cam.mode === "dialog") updateLens(cam.lensX || 0, cam.lensY || 0, dt);
     else if (lens.x || lens.y) updateLens(0, 0, dt);
     // tremor de câmera (golpes no chefe)
     if (G.shake > 0) {

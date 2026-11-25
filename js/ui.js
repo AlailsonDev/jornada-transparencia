@@ -234,19 +234,27 @@ window.CT = window.CT || {};
   const D = { open: false };
   UI.dialog = D;
   let typer = 0;
+  /* Celular deitado (tela baixa): a caixa fica na lateral direita, para o
+   * cenário aparecer à esquerda. As falas longas são divididas em páginas
+   * do tamanho da tela (o texto é o mesmo, só distribuído em mais páginas).
+   * O mesmo critério está no CSS (bloco "DIÁLOGO NA LATERAL"). */
+  const LATERAL = window.matchMedia ? matchMedia("(max-height: 520px) and (orientation: landscape)") : { matches: false };
+  D.lateral = () => LATERAL.matches;
 
   D.show = function (cfg) {
-    D.cfg = cfg; D.open = true; D.page = 0; D.wrong = new Set(); D.focus = -1;
+    D.cfg = cfg; D.open = true; D.page = 0; D.wrong = new Set(); D.focus = -1; D.pags = null;
     D.step = cfg.paginas && cfg.paginas.length ? "intro" : "question"; // sem falas: vai direto à pergunta
     D.tBase = cfg.tempoInicial || 0; D.tStart = null;
     $("dialog").hidden = false;
+    recolher(false);
+    document.body.classList.add("dlg-open");
     $("dialog").style.setProperty("--speaker", cfg.speaker.cor);
     if (D.step === "question") startTimer();
     render();
   };
   D.close = function (silent) {
     clearInterval(typer); stopTimer();
-    D.open = false; $("dialog").hidden = true;
+    D.open = false; $("dialog").hidden = true; document.body.classList.remove("dlg-open");
     const c = D.cfg; D.cfg = null;
     if (!silent && c && c.onFechar) c.onFechar(D.step === "right", D.elapsed());
   };
@@ -269,7 +277,7 @@ window.CT = window.CT || {};
   function head(stepLabel) {
     const s = D.cfg.speaker;
     const ini = s.nome.replace(/^(Dr\.ª?|Dra\.|Eng\.ª|Seu|Dona)\s+/i, "").split(/\s+/).map((w) => w[0]).slice(0, 2).join("");
-    return `<div class="dlg-head"><div class="avatar">${esc(ini)}</div><div><div class="dlg-name">${esc(s.nome)}</div><div class="dlg-role">${esc(s.cargo)}</div></div><div class="dlg-step">${esc(stepLabel)}</div><button class="dlg-x only-touch" type="button" aria-label="Fechar">✕</button></div>`;
+    return `<div class="dlg-head"><div class="avatar">${esc(ini)}</div><div><div class="dlg-name">${esc(s.nome)}</div><div class="dlg-role">${esc(s.cargo)}</div></div><div class="dlg-step">${esc(stepLabel)}</div><button class="dlg-peek only-touch" type="button" aria-label="Espiar o cenário" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span>VER TEXTO</span></button><button class="dlg-x only-touch" type="button" aria-label="Fechar">✕</button></div>`;
   }
 
   // escreve o texto (falas com vários parágrafos: separados por uma linha em branco, "\n\n")
@@ -295,15 +303,64 @@ window.CT = window.CT || {};
     return true;
   }
 
+  /* Páginas da conversa. Na caixa lateral, cada fala que não cabe na altura
+   * da tela é dividida (entre palavras) em mais páginas. D.pags: [{t, o}],
+   * o = índice da fala original. */
+  function introHTML(c, i, n, legal) {
+    const last = i >= n - 1;
+    return head(c.rotuloIntro || "Curiosidade") + `<div class="dlg-body"><p class="dlg-text"></p>${legal && c.baseLegal ? `<span class="legal">Base legal: ${esc(c.baseLegal)}</span>` : ""}</div>
+        <div class="dlg-foot"><span class="hint only-kbd"><span class="kbd">ESC</span> fechar</span><span class="hint" style="margin-right:0">${i + 1}/${n}</span>
+        <button class="btn-dlg" id="dlg-next">${last ? (c.pergunta ? "VER A PERGUNTA" : (c.rotuloFim || "VAMOS LÁ!")) : "CONTINUAR"} <span class="kbd">ESPAÇO</span></button></div>`;
+  }
+  const chaveTela = () => D.lateral() ? innerWidth + "x" + innerHeight : "normal";
+  function paginar() {
+    const c = D.cfg, el = $("dialog");
+    D.pagKey = chaveTela();
+    if (!D.lateral()) { D.pags = c.paginas.map((t, o) => ({ t, o })); return; }
+    // mede com a caixa montada (com a base legal, o pior caso), sem o texto
+    el.innerHTML = introHTML(c, 0, 2, true);
+    const txt = el.querySelector(".dlg-text");
+    setParas(txt, "");
+    const outros = el.offsetHeight - txt.offsetHeight;
+    const cabe = innerHeight - 12 - outros;           // altura livre para o texto
+    const mede = (t) => { setParas(txt, t); return txt.scrollHeight <= cabe; };
+    const pags = [];
+    c.paginas.forEach((fala, o) => {
+      let resto = fala;
+      while (resto) {
+        if (mede(resto)) { pags.push({ t: resto, o }); break; }
+        // maior começo da fala (terminando numa palavra) que ainda cabe
+        const tk = resto.split(/(\s+)/);
+        let lo = 1, hi = tk.length - 1, best = 1;
+        while (lo <= hi) {
+          const mid = (lo + hi) >> 1;
+          if (mede(tk.slice(0, mid).join("").trimEnd())) { best = mid; lo = mid + 1; } else hi = mid - 1;
+        }
+        const pedaco = tk.slice(0, best).join("").trimEnd();
+        pags.push({ t: pedaco, o });
+        resto = resto.slice(pedaco.length).replace(/^\s+/, "");
+      }
+    });
+    D.pags = pags;
+  }
+  // tela girou/mudou de tamanho no meio da conversa: refaz as páginas
+  addEventListener("resize", () => {
+    if (!D.open || D.step !== "intro" || !D.pags || D.pagKey === chaveTela()) return;
+    const o = (D.pags[D.page] || {}).o || 0;
+    finishTyping(); paginar();
+    D.page = Math.max(0, D.pags.findIndex((p) => p.o === o));
+    render();
+  });
+
   function render() {
     const c = D.cfg, el = $("dialog");
     const tag = c.etiqueta || "Desafio";
+    el.classList.toggle("intro", D.step === "intro");
     if (D.step === "intro") {
-      const last = D.page >= c.paginas.length - 1;
-      el.innerHTML = head(c.rotuloIntro || "Curiosidade") + `<div class="dlg-body"><p class="dlg-text"></p>${last && c.baseLegal ? `<span class="legal">Base legal: ${esc(c.baseLegal)}</span>` : ""}</div>
-        <div class="dlg-foot"><span class="hint only-kbd"><span class="kbd">ESC</span> fechar</span><span class="hint" style="margin-right:0">${D.page + 1}/${c.paginas.length}</span>
-        <button class="btn-dlg" id="dlg-next">${last ? (c.pergunta ? "VER A PERGUNTA" : (c.rotuloFim || "VAMOS LÁ!")) : "CONTINUAR"} <span class="kbd">ESPAÇO</span></button></div>`;
-      typeInto(el.querySelector(".dlg-text"), c.paginas[D.page]);
+      if (!D.pags || D.pagKey !== chaveTela()) paginar();
+      const n = D.pags.length, last = D.page >= n - 1;
+      el.innerHTML = introHTML(c, D.page, n, last);
+      typeInto(el.querySelector(".dlg-text"), D.pags[D.page].t);
       $("dlg-next").onclick = () => advance();
     } else if (D.step === "question" || D.step === "wrong") {
       const wrongNow = D.step === "wrong";
@@ -315,7 +372,7 @@ window.CT = window.CT || {};
             ? `<span class="hint">Releia a explicação e tente de novo. O tempo continua correndo.</span>${speedChip(c)}<button class="btn-dlg" id="dlg-retry">TENTAR NOVAMENTE <span class="kbd">ESPAÇO</span></button>`
             : `<span class="hint only-kbd"><span class="kbd">A</span><span class="kbd">B</span><span class="kbd">C</span><span class="kbd">D</span> ou clique para responder · <span class="kbd">ESC</span> fechar</span><span class="hint only-touch">Toque na alternativa para responder</span>${speedChip(c)}`}</div>`;
       el.querySelectorAll(".opt").forEach((b) => (b.onclick = () => answer(+b.dataset.i)));
-      if (wrongNow) $("dlg-retry").onclick = () => retry();
+      if (wrongNow) { $("dlg-retry").onclick = () => retry(); mostrarFim(el); }
     } else if (D.step === "right") {
       el.innerHTML = head(tag) + `<div class="dlg-body"><p class="dlg-text question">${esc(c.pergunta)}</p>
         <div class="options">${c.alternativas.map((a, i) => `<button class="opt ${i === c.correta ? "right" : D.wrong.has(i) ? "wrong" : ""}" disabled><span class="letter">${LETTERS[i]}</span><span>${esc(a)}</span></button>`).join("")}</div>
@@ -323,15 +380,30 @@ window.CT = window.CT || {};
         </div>
         <div class="dlg-foot"><button class="btn-dlg go" id="dlg-finish">${esc(c.rotuloFinal || "VOLTAR À CIDADE")} <span class="kbd">ESPAÇO</span></button></div>`;
       $("dlg-finish").onclick = () => finish();
+      mostrarFim(el);
     }
+    el.querySelector(".dlg-peek").setAttribute("aria-pressed", String(el.classList.contains("recolhido")));
   }
+  // caixa com rolagem (celular deitado): leva até a explicação da resposta
+  function mostrarFim(el) {
+    const b = el.querySelector(".dlg-body"), f = el.querySelector(".feedback");
+    if (b && f && b.scrollHeight > b.clientHeight) b.scrollTop = f.offsetTop - b.offsetTop - 8;
+  }
+
+  /* Espiar: recolhe a caixa a uma barra (só o cabeçalho) para ver o cenário */
+  function recolher(v) {
+    const el = $("dialog");
+    el.classList.toggle("recolhido", v);
+    const b = el.querySelector(".dlg-peek"); if (b) b.setAttribute("aria-pressed", String(v));
+  }
+  D.recolhido = () => $("dialog").classList.contains("recolhido");
 
   // bônus de rapidez ao vivo (diminui enquanto a pergunta está na tela)
   const speedChip = (c) => c.bonusAgora ? `<span class="speed-chip" title="Quanto mais rápido responder, mais pontos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>Rapidez <b>+${c.bonusAgora(D.elapsed())}</b></span>` : "";
   function advance() {
     if (finishTyping()) return;
     CT.Audio.play("click");
-    if (D.page < D.cfg.paginas.length - 1) { D.page++; render(); }
+    if (D.page < D.pags.length - 1) { D.page++; render(); }
     else if (!D.cfg.pergunta) D.close();   // só conversa (sem pergunta): fecha no fim
     else { D.step = "question"; D.focus = -1; startTimer(); render(); }
   }
@@ -355,18 +427,23 @@ window.CT = window.CT || {};
   function finish() {
     clearInterval(typer); stopTimer();
     const c = D.cfg;
-    D.open = false; $("dialog").hidden = true; D.cfg = null;
+    D.open = false; $("dialog").hidden = true; D.cfg = null; document.body.classList.remove("dlg-open");
     if (c && c.onFim) c.onFim();
   }
 
   // botão ✕ (toque): o mesmo que ESC
-  $("dialog").addEventListener("click", (e) => { if (e.target.closest(".dlg-x")) D.key({ key: "Escape" }); });
+  $("dialog").addEventListener("click", (e) => {
+    if (e.target.closest(".dlg-x")) return D.key({ key: "Escape" });
+    // olho: recolhe/mostra; com a caixa recolhida, tocar na barra também a mostra de novo
+    if (e.target.closest(".dlg-peek") || (D.recolhido() && e.target.closest(".dlg-head"))) { CT.Audio.play("click"); recolher(!D.recolhido()); }
+  });
 
   /* Teclado dentro do diálogo. Retorna true se consumiu a tecla. */
   D.key = function (e) {
     if (!D.open) return false;
     const k = e.key;
     if (k === "Escape") { if (D.step === "right") finish(); else D.close(); return true; }
+    if (D.recolhido()) { recolher(false); return true; } // caixa recolhida: a tecla só a mostra de novo
     if (D.step === "intro") { if (k === " " || k === "Enter") advance(); return true; }
     if (D.step === "wrong") { if (k === " " || k === "Enter") retry(); return true; }
     if (D.step === "right") { if (k === " " || k === "Enter") finish(); return true; }
