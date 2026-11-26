@@ -481,6 +481,26 @@ window.CT = window.CT || {};
     const d = room.npc.root.position;
     return Math.hypot(P.x - d.x, P.z - d.z) < 4.8 && !(P.z > room.exitZ - 1.8);
   }
+  // Bia Festas: a Bia, organizadora da festa, conversa com quem chega perto
+  function nearBia() {
+    const room = interiors.current;
+    return !!(G.festa && room && room.bia && Math.hypot(P.x - room.bia.x, P.z - room.bia.z) < 2.3);
+  }
+  function talkToBia() {
+    const B = interiors.current.bia, d = CT.BIA;
+    G.mode = "dialog"; UI.prompt(null);
+    if (player.mode === "dance") player.mode = "idle";
+    P.speed = 0; player.speed = 0;
+    P.heading = Math.atan2(B.x - P.x, B.z - P.z);
+    B.falando = true;
+    cam.talkTo = B.ch.root.position; cam.mode = "dialog";
+    A.play("click");
+    UI.dialog.show({
+      speaker: { nome: d.nome, cargo: d.cargo + " da festa", cor: "#E83E8C" },
+      rotuloIntro: "Bia Festas", paginas: d.falas, rotuloFim: "VOLTAR PARA A FESTA",
+      onFechar: () => { B.falando = false; cam.talkTo = null; G.mode = "interior"; cam.mode = "interior"; },
+    });
+  }
   function toggleDance() {
     const room = interiors.current;
     if (player.mode === "dance") { player.mode = "idle"; return; }
@@ -521,7 +541,7 @@ window.CT = window.CT || {};
     }
     if (G.mode === "interior") {
       const room = interiors.current;
-      return Math.hypot(P.x - room.talk.x, P.z - room.talk.z) < room.talk.r || P.z > room.exitZ - 1.8 || nearDino();
+      return Math.hypot(P.x - room.talk.x, P.z - room.talk.z) < room.talk.r || P.z > room.exitZ - 1.8 || nearDino() || nearBia();
     }
     return false;
   }
@@ -568,6 +588,7 @@ window.CT = window.CT || {};
     } else if (G.mode === "interior") {
       const room = interiors.current;
       if (Math.hypot(P.x - room.talk.x, P.z - room.talk.z) < room.talk.r) return talkToNPC();
+      if (nearBia()) return talkToBia();
       if (nearDino()) return toggleDance();
       if (P.z > room.exitZ - 1.8) return exitBuilding();
     }
@@ -1283,6 +1304,7 @@ window.CT = window.CT || {};
     if (G.mode === "interior") {
       const room = interiors.current;
       if (Math.hypot(P.x - room.talk.x, P.z - room.talk.z) < room.talk.r) return UI.prompt("PARA CONVERSAR COM " + (room.def.npc.chamado || room.def.npc.nome).toUpperCase(), "", "ESPAÇO");
+      if (nearBia()) return UI.prompt("PARA CONVERSAR COM A BIA", "", "ESPAÇO");
       if (nearDino()) return UI.prompt(player.mode === "dance" ? "PARA PARAR DE DANÇAR" : "PARA DANÇAR COM O DINOSSAURO", "", "ESPAÇO");
       if (P.z > room.exitZ - 1.8) return UI.prompt("PARA VOLTAR À CIDADE", "", "ESPAÇO");
       return UI.prompt(null);

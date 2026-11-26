@@ -63,6 +63,7 @@ window.CT = window.CT || {};
         }
       }
       current.npc.update(dt);
+      if (current.bia) current.bia.update(dt, t, alvo);   // Bia Festas: a organizadora
       current.anim.forEach((f) => f(dt, t));
     };
     return api;

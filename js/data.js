@@ -498,6 +498,11 @@ CT.MODELOS = {
     // cavalo, óculos de armação rosa-clara, sorriso de lado, colar com pingente, casaco de oncinha e blusa preta.
     anaBeatriz: { arquivo: "ana-beatriz.glb", altura: 1.69, origem: "Mixamo — Michelle, adaptada a partir do desenho",
       cabeca: { abaixoDoTopo: 0.2, frente: 0.1 }, torso: { frente: 0.13, altura: 0.04, costas: 0.17 } },
+    // Bia, a organizadora da Bia Festas: Michelle (Mixamo) refeita a partir do desenho: cabelo
+    // castanho-escuro liso e comprido, sorriso de lado com batom marrom, brincos dourados,
+    // blazer xadrez marrom, blusa preta, calça reta e sapato de salto.
+    bia: { arquivo: "bia.glb", altura: 1.66, origem: "Mixamo — Michelle, adaptada a partir do desenho",
+      cabeca: { abaixoDoTopo: 0.2, frente: 0.1 }, torso: { frente: 0.13, altura: 0.04, costas: 0.17 } },
     // Seu Lima, guarda municipal do pórtico de boas-vindas (feito a partir de uma foto):
     // o mesmo avatar do Caio, com sorriso largo, farda, boné de guarda e coturnos (tudo no arquivo).
     // O Prefeito (desenho da equipe): calvo, óculos de armação fina, camisa social branca.
@@ -654,6 +659,18 @@ CT.SEU_LIMA = {
 };
 
 /* ---------------------------------------------------------------------
+ * BIA — organizadora da Bia Festas (área secreta)
+ * Fica ao lado da mesa do bolo, de braços cruzados, vendo a pista; com
+ * ESPAÇO perto dela, ela fala (uma fala por página).
+ * ------------------------------------------------------------------- */
+CT.BIA = {
+  nome: "Bia",
+  cargo: "Organizadora",
+  modelo: "bia",
+  falas: ["Estava com saudades de organizar uma festa!"],
+};
+
+/* ---------------------------------------------------------------------
  * OUTDOORS NO ALTO DOS PRÉDIOS
  * Cada outdoor mostra um logo de CT.CONFIG.logosApoio (pelo id) ou "todos"
  * (os quatro lado a lado), sobre fundo branco. Eles se repetem em
@@ -687,6 +704,7 @@ CT.CREDITOS = [
   ["Personagens", [
     "Animações e personagens de apoio: Michelle e X Bot · Mixamo/Adobe (uso gratuito, inclusive em projetos institucionais e comerciais)",
     "Pricylla: criada a partir de um desenho enviado pela equipe, sobre a Michelle do Mixamo (cabelo, rosto, roupa social, sapatos, colar e óculos refeitos para o jogo)",
+    "Bia, a organizadora da Bia Festas: criada a partir de um desenho enviado pela equipe, sobre a Michelle do Mixamo (cabelo, rosto, blazer xadrez, blusa preta, calça, salto e brincos dourados refeitos para o jogo)",
     "Lorena, a ouvidora: criada a partir de um desenho enviado pela equipe, sobre a Michelle do Mixamo (cabelo ondulado, rosto, blusa listrada e brincos de pérolas refeitos para o jogo)",
     "Ana: criada a partir de um desenho enviado pela equipe, sobre a Michelle do Mixamo (tranças, rosto, camisa, acessórios e roupas refeitos para o jogo)",
     "Caio: criado a partir de um desenho enviado pela equipe, sobre um avatar Ready Player Me (barba, cabelo, aparelho, camiseta e corrente refeitos para o jogo)",

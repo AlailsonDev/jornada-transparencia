@@ -432,12 +432,42 @@ window.CT = window.CT || {};
       }));
     }
 
+    /* Bia, a organizadora: ao lado da mesa do bolo, feliz e de braços cruzados, vendo
+     * a pista; com o jogador perto, vira para ele. A exclamação indica que dá para conversar. */
+    let bia = null;
+    const B = CT.BIA;
+    if (B && CT.createPedestrian) {
+      const ch = CT.createPedestrian({ modelo: B.modelo });
+      const bx = -6.25, bz = -4.45, base = Math.atan2(0 - bx, PZ - bz);   // olhando para a pista
+      ch.root.position.set(bx, 0, bz); ch.root.rotation.y = base;
+      ch.mode = "idle"; ch.bracosCruzados = true; ch.speed = 0;
+      group.add(ch.root);
+      col.addCentered(bx, bz, 0.6, 0.6);
+      const exc = new THREE.Sprite(new THREE.SpriteMaterial({ map: U.talkTex(), transparent: true, depthWrite: false }));
+      exc.scale.set(0.34, 0.68, 1); exc.renderOrder = 5; group.add(exc);
+      const alt = ch.root.userData.altura || 1.66;
+      bia = { ch, x: bx, z: bz, falando: false, exc, excA: 1 };
+      bia.update = function (dt, t, alvo) {
+        let want = base;
+        if (alvo && Math.hypot(alvo.x - bx, alvo.z - bz) < 5) want = Math.atan2(alvo.x - bx, alvo.z - bz);
+        ch.root.rotation.y += U.angleDiff(ch.root.rotation.y, want) * Math.min(1, dt * 4);
+        ch.mode = bia.falando ? "talk" : "idle";
+        ch.update(dt);
+        bia.excA = U.damp(bia.excA, bia.falando ? 0 : 1, 8, dt);
+        const pulse = 1 + Math.sin(t * 5) * 0.06;
+        exc.visible = bia.excA > 0.02;
+        exc.material.opacity = bia.excA;
+        exc.position.set(bx, alt + 0.56 + Math.sin(t * 2.6) * 0.09, bz);
+        exc.scale.set(0.34 * pulse * bia.excA, 0.68 * pulse * bia.excA, 1);
+      };
+    }
+
     return {
-      group, colliders: col, anim, npc, festa: true,
+      group, colliders: col, anim, npc, festa: true, bia,
       def: { nome: "Bia Festas", cor: "#E83E8C" },
       bounds: { x0: -RW + 0.6, x1: RW - 0.6, z0: -RD + 0.6, z1: RD - 1.8 },   // a câmera fica do lado de dentro da parede da porta
       spawn: { x: 0, z: 5.2, heading: Math.PI },
-      talk: { x: 0, z: -999, r: 0 },            // ninguém para conversar: é só festa!
+      talk: { x: 0, z: -999, r: 0 },            // conversa só com a Bia (game.js: nearBia)
       exitZ: RD - 0.3,
     };
   }

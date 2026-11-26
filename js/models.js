@@ -531,7 +531,7 @@ window.CT_MODELOS_EMBUTIDOS = window.CT_MODELOS_EMBUTIDOS || {};
     }
     function aimFn(b, c, d, w) { aim(b, c, d, w); }
     function rotFn(b, a, g) { rotateWorld(b, a, g); }
-    let waveW = 0, wrongT = 0, airW = 0, landW = 0, salW = 0;
+    let waveW = 0, wrongT = 0, airW = 0, landW = 0, salW = 0, cruzW = 0;
     const FWD = new THREE.Vector3();
     const UP = new THREE.Vector3(0, 1, 0), RIGHT = new THREE.Vector3();
 
@@ -621,6 +621,21 @@ window.CT_MODELOS_EMBUTIDOS = window.CT_MODELOS_EMBUTIDOS || {};
         // rotação a cada quadro nos modelos cuja animação parada não mexe nesse osso
         inner.rotation.z = Math.sin(Math.PI * 2 * (ch._clapT / (per * 4))) * 0.05;
       } else if (ch._clapT) { inner.rotation.z = 0; ch._clapT = 0; }
+      // braços cruzados (ch.bracosCruzados, ex.: a Bia na festa): braços junto ao corpo e
+      // antebraços cruzados na frente da barriga, o esquerdo por cima; vale parado e conversando
+      cruzW = U.damp(cruzW, ch.bracosCruzados && still && (ch.mode === "idle" || ch.mode === "talk") ? 1 : 0, 7, dt);
+      if (cruzW > 0.01 && armL && armR && foreL && foreR) {
+        model.updateMatrixWorld(true);
+        const rq = root.getWorldQuaternion(new THREE.Quaternion());
+        const F = new THREE.Vector3(0, 0, 1).applyQuaternion(rq), L = new THREE.Vector3(1, 0, 0).applyQuaternion(rq);
+        [[armL, foreL, handL, midL, 1], [armR, foreR, handR, midR, -1]].forEach(([a_, f_, h_, m_, sx]) => {
+          const cima = sx > 0 ? 1 : 0;
+          aim(a_, f_, new THREE.Vector3().addScaledVector(F, 0.34).addScaledVector(UP, -0.9).addScaledVector(L, sx * 0.2).normalize(), cruzW);
+          const fd = new THREE.Vector3().addScaledVector(L, -sx * 0.86).addScaledVector(F, 0.36 + 0.1 * cima).addScaledVector(UP, 0.3 + 0.1 * cima).normalize();
+          aim(f_, h_, fd, cruzW);
+          if (m_) aim(h_, m_, new THREE.Vector3().addScaledVector(L, -sx * 0.55).addScaledVector(F, -0.6).addScaledVector(UP, cima ? -0.1 : 0.15).normalize(), cruzW);
+        });
+      }
       // dançando como o dinossauro da Bia Festas: pulinhos no ritmo, corpo balançando,
       // passinhos com uma perna de cada vez, bracinhos de tiranossauro sacudindo e, a cada
       // 16 batidas, uma voltinha completa. ch.dancaTempo() dá o relógio da festa (assim todos
