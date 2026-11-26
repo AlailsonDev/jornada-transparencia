@@ -34,7 +34,12 @@
   <section id="title-screen" aria-label="Tela inicial">
     <div class="title-card">
       <div class="title-kicker" id="title-foot"></div>
-      <h1 class="game-title">A Jornada da <span>Transparência</span></h1>
+      <h1 class="game-title">
+        <picture>
+          <source srcset="assets/logos/titulo.webp" type="image/webp">
+          <img src="assets/logos/titulo.png" width="711" height="299" alt="A Jornada da Transparência" decoding="async" fetchpriority="high">
+        </picture>
+      </h1>
       <p class="title-lead" id="title-lead"></p>
       <nav class="menu-list title-menu" id="title-menu" aria-label="Menu principal">
         <button class="menu-btn primary" id="btn-start"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg><span class="label-text">CARREGANDO A CIDADE…</span><span class="kbd">ENTER</span></button>
