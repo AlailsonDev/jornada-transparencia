@@ -386,6 +386,7 @@ A `apiKey` do Firebase não é uma senha: ela só identifica o projeto e pode fi
 - **Apagar partidas:** pelo console do Firebase, em **Firestore Database → Dados**, apague uma partida ou a coleção inteira.
 - **Abrindo o `index.html` direto do computador:** o ranking compartilhado também funciona, desde que haja internet. Sem internet, a partida fica guardada e é enviada depois.
 - Se o Firebase não carregar ou não estiver configurado, o jogo usa o ranking local automaticamente.
+- **Pontos extras da Bia Festas:** cada partida guarda também o campo `extra`, com os pontos ganhos na área secreta (achar o CtrlDino e dançar com ele, até 200). Esses pontos já estão somados no total. No ranking, quem ganhou esses pontos tem "🎉 Bônus Secreto" embaixo do total (passando o mouse, aparece quantos pontos foram). A tela de fim mostra "inclui +200 de Bônus Secreto", e a planilha CSV tem a coluna "Extras da Bia Festas". **Para o ranking online guardar esse campo, publique de novo o [`firestore.rules`](firestore.rules) atualizado** (passo 3). Enquanto as regras antigas estiverem publicadas, a partida é registrada normalmente, só que sem o campo `extra`.
 
 ## Dicas para o evento
 

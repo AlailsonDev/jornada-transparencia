@@ -11,6 +11,9 @@
  * Nos dois modos, cada partida também é guardada no navegador, como cópia
  * de segurança.
  *
+ * Cada partida guarda também "extra": os pontos extras ganhos na Bia Festas
+ * (já incluídos em "pontos"), para o ranking mostrar de onde vieram.
+ *
  * Ordem do ranking: mais pontos → mais acertos → menor tempo → quem
  * jogou primeiro.
  * ===================================================================== */
@@ -30,7 +33,7 @@
   R.onchange = null; // a interface redesenha o ranking quando algo muda
   const avisar = () => { if (typeof R.onchange === "function") try { R.onchange(); } catch (e) { /* interface */ } };
   let col = null;
-  const CAMPOS = ["id", "nome", "pontos", "acertos", "perguntas", "tempo", "resultado", "faseInicial", "personagem", "data"];
+  const CAMPOS = ["id", "nome", "pontos", "extra", "acertos", "perguntas", "tempo", "resultado", "faseInicial", "personagem", "data"];
 
   /** registro vindo de fora (servidor ou navegador): só os campos esperados, nos tipos certos */
   function normal(d, id) {
@@ -39,6 +42,7 @@
       id: String(d.id || id || "").slice(0, 40),
       nome: R.limparNome(d.nome) || "Anônimo",
       pontos: Math.max(0, Math.round(d.pontos)),
+      extra: Math.max(0, Math.min(Math.round(+d.extra || 0), Math.round(d.pontos))),
       acertos: d.acertos | 0, perguntas: d.perguntas | 0,
       tempo: Math.max(0, Math.round(+d.tempo || 0)),
       resultado: String(d.resultado || "vitoria").slice(0, 20),
@@ -74,13 +78,19 @@
       ON.ativo = false; col = null;
     }
   }
-  function enviar(e) {
+  function enviar(e, semExtra) {
     const doc = {};
     CAMPOS.forEach((k) => (doc[k] = e[k]));
+    // "extra" só vai quando há pontos extras; e, se as regras publicadas no Firebase ainda
+    // forem as antigas (sem esse campo), a partida é reenviada sem ele em vez de se perder
+    if (semExtra || !doc.extra) delete doc.extra;
     ON.pendentes.add(e.id); tentados.add(e.id);
     col.doc(e.id).set(doc)
       .then(() => { e.pendente = false; save(); })
-      .catch((err) => { console.warn("Ranking online: envio recusado", err); ON.erro = err && err.code || "erro"; avisar(); });
+      .catch((err) => {
+        if (!semExtra && "extra" in doc && err && err.code === "permission-denied") return enviar(e, true);
+        console.warn("Ranking online: envio recusado", err); ON.erro = err && err.code || "erro"; avisar();
+      });
   }
   /* partidas feitas no modo online que o servidor ainda não tem (ex.: o jogo
    * foi fechado sem internet e sem a fila do navegador) */
@@ -120,6 +130,7 @@
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
       nome: R.limparNome(dados.nome) || "Anônimo",
       pontos: Math.max(0, Math.round(dados.pontos || 0)),
+      extra: Math.max(0, Math.min(Math.round(dados.extra || 0), Math.round(dados.pontos || 0))),
       acertos: dados.acertos | 0,
       perguntas: dados.perguntas | 0,
       tempo: Math.max(0, Math.round(dados.tempo || 0)),
@@ -173,10 +184,10 @@
   /** planilha CSV (abre no Excel/LibreOffice) com todas as partidas */
   R.csv = function () {
     const q = (v) => `"${String(v).replace(/"/g, '""')}"`;
-    const rows = [["Posição", "Nome", "Pontos", "Acertos", "Perguntas", "Tempo", "Resultado", "Personagem", "Fase inicial", "Data e hora"]];
+    const rows = [["Posição", "Nome", "Pontos", "Extras da Bia Festas", "Acertos", "Perguntas", "Tempo", "Resultado", "Personagem", "Fase inicial", "Data e hora"]];
     R.lista().forEach((e, i) => {
       const d = new Date(e.data);
-      rows.push([i + 1, e.nome, e.pontos, e.acertos, e.perguntas, R.tempoTexto(e.tempo), R.resultadoTexto(e.resultado), e.personagem || "", (e.faseInicial | 0) + 1, isNaN(d) ? e.data : d.toLocaleString("pt-BR")]);
+      rows.push([i + 1, e.nome, e.pontos, e.extra | 0, e.acertos, e.perguntas, R.tempoTexto(e.tempo), R.resultadoTexto(e.resultado), e.personagem || "", (e.faseInicial | 0) + 1, isNaN(d) ? e.data : d.toLocaleString("pt-BR")]);
     });
     return "﻿" + rows.map((r) => r.map(q).join(";")).join("\r\n");
   };

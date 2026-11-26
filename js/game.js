@@ -26,6 +26,7 @@ window.CT = window.CT || {};
     correct: 0, answered: false, playTime: 0, qTime: {}, startPhase: 0, over: false, // acertos, tempo e fim da partida
     unlocked: 0, statuses: [], current: -1, mapOpen: false, explore: false,
     dino: { achou: false, dancou: false }, // bônus secreto da Bia Festas (uma vez por partida)
+    extra: 0,                              // pontos extras ganhos na Bia Festas (já somados em score)
   };
   const P = { x: 0, z: 0, y: 0, heading: 0, speed: 0, jy: 0, vy: 0 }; // jy/vy: altura e velocidade do pulo
   const cam = { pos: new THREE.Vector3(), look: new THREE.Vector3(), mode: "follow" };
@@ -164,7 +165,7 @@ window.CT = window.CT || {};
 
   /* ---------------- progresso ---------------- */
   function resetProgress() {
-    G.score = 0; G.dino = { achou: false, dancou: false }; G.completed = new Array(N).fill(false); G.firstTry = 0; G.bossDefeated = false; G.bossHits = 0; G.explore = false;
+    G.score = 0; G.extra = 0; G.dino = { achou: false, dancou: false }; G.completed = new Array(N).fill(false); G.firstTry = 0; G.bossDefeated = false; G.bossHits = 0; G.explore = false;
     G.correct = 0; G.answered = false; G.playTime = 0; G.qTime = {}; G.startPhase = 0; G.over = false;
     UI.setPlaytime(0);
     UI.bossBar.hide(); document.body.classList.remove("boss-fight");
@@ -514,7 +515,7 @@ window.CT = window.CT || {};
     if (!G.dino.dancou) {
       G.dino.dancou = true;
       const pts = bonusDino("dancar");
-      if (pts) { G.score += pts; updateHUD(); UI.toast(`Que passinho! <b>+${pts} pontos</b> por dançar com o CtrlDino!`, "success", 3200); }
+      if (pts) { G.score += pts; G.extra += pts; updateHUD(); UI.toast(`Que passinho! <b>+${pts} pontos</b> por dançar com o CtrlDino!`, "success", 3200); }
     }
   }
   /* pontos do bônus secreto; só valem com a partida em andamento */
@@ -655,7 +656,7 @@ window.CT = window.CT || {};
       // primeira vez na partida: mensagem arqueada e bônus (sair e entrar de novo não conta)
       G.dino.achou = true;
       const pts = bonusDino("achar");
-      if (pts) { G.score += pts; updateHUD(); }
+      if (pts) { G.score += pts; G.extra += pts; updateHUD(); }
       UI.dinoBanner(pts);
       A.play("success");
     }
@@ -715,7 +716,7 @@ window.CT = window.CT || {};
   /* resposta errada: sem perda de pontos, mas o tempo segue correndo */
   function markWrong(key, t) { G.qTime[key] = t; G.answered = true; }
   function matchStats(tipo) {
-    return { pontos: G.score, acertos: G.correct, perguntas: totalQuestions(), tempo: G.playTime, faseInicial: G.startPhase, resultado: tipo, personagem: charDef(G.charId).nome, genero: charDef(G.charId).genero };
+    return { pontos: G.score, extra: G.extra | 0, acertos: G.correct, perguntas: totalQuestions(), tempo: G.playTime, faseInicial: G.startPhase, resultado: tipo, personagem: charDef(G.charId).nome, genero: charDef(G.charId).genero };
   }
   function endHandlers(tipo) {
     return {

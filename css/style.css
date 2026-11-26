@@ -483,6 +483,8 @@ body.boss-fight #hud, body.boss-fight #toast { display: none; }
 .rank-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .rank-table td.name { font-weight: 700; max-width: 220px; overflow-wrap: anywhere; }
 .rank-table td.name small { display: block; font-weight: 400; font-size: 0.74rem; color: var(--ink-soft); }
+.rank-table td.num small.rank-extra { display: block; font-size: 0.7rem; font-weight: 700; color: #FF7AC0; white-space: nowrap; }
+.stat small.stat-extra { display: block; margin-top: 2px; font-size: 0.72rem; font-weight: 700; color: #E83E8C; }
 .rank-table td.date { color: var(--ink-soft); white-space: nowrap; font-size: 0.82rem; }
 .rank-table tr.me td { background: rgba(255, 176, 32, 0.18); }
 .rank-table tr.me td:first-child { box-shadow: inset 4px 0 0 var(--amber); }

@@ -586,7 +586,7 @@ window.CT = window.CT || {};
       <div class="victory-kicker">${esc(kicker)}</div>
       <h1 class="victory-title">${esc(title)}</h1>
       <div class="stats">
-        <div class="stat"><b>${st.pontos.toLocaleString("pt-BR")}</b><span>pontos</span></div>
+        <div class="stat"><b>${st.pontos.toLocaleString("pt-BR")}</b><span>pontos</span>${st.extra > 0 ? `<small class="stat-extra">🎉 inclui +${st.extra.toLocaleString("pt-BR")} de Bônus Secreto</small>` : ""}</div>
         <div class="stat"><b>${st.acertos}/${st.perguntas}</b><span>respostas certas</span></div>
         <div class="stat"><b>${R.tempoTexto(st.tempo)}</b><span>tempo de partida</span></div>
       </div>
@@ -662,7 +662,7 @@ window.CT = window.CT || {};
       <tbody>${rows.map((r) => r === null ? `<tr class="gap"><td colspan="${o.data ? 7 : 6}">⋯</td></tr>` : (([e, i]) => `<tr class="${e.id === o.destaque ? "me" : ""}">
         <td>${medal(i)}</td>
         <td class="name">${esc(e.nome)}${e.personagem || e.faseInicial > 0 ? `<small>${[e.personagem ? "com " + esc(e.personagem) : "", e.faseInicial > 0 ? `a partir da fase ${e.faseInicial + 1}` : ""].filter(Boolean).join(" · ")}</small>` : ""}</td>
-        <td class="num"><b>${e.pontos.toLocaleString("pt-BR")}</b></td>
+        <td class="num"><b>${e.pontos.toLocaleString("pt-BR")}</b>${e.extra > 0 ? `<small class="rank-extra" title="Inclui ${e.extra.toLocaleString("pt-BR")} pontos extras ganhos na Bia Festas">🎉 Bônus Secreto</small>` : ""}</td>
         <td class="num">${e.acertos}/${e.perguntas}</td>
         <td class="num">${R.tempoTexto(e.tempo)}</td>
         <td>${res(e.resultado)}</td>${o.data ? `<td class="date">${esc(R.dataTexto(e.data))}</td>` : ""}
@@ -679,7 +679,7 @@ window.CT = window.CT || {};
         : '<span class="rank-live off">● conectando…</span>';
       onde = `${st} ${qtd} por todos os jogadores.`;
     }
-    $("ranking-meta").innerHTML = `${onde} Cada resposta certa vale <b>${cfg.pontosPorAcerto}</b> pontos + até <b>${br.maximo || 0}</b> de bônus de rapidez. Empate: mais acertos e, depois, menor tempo.`;
+    $("ranking-meta").innerHTML = `${onde} Cada resposta certa vale <b>${cfg.pontosPorAcerto}</b> pontos + até <b>${br.maximo || 0}</b> de bônus de rapidez. Os pontos extras da área secreta aparecem marcados com 🎉 (já estão no total). Empate: mais acertos e, depois, menor tempo.`;
     $("ranking-body").innerHTML = UI.rankingTable(lista, { limite: 100, data: true });
     // o ranking online só pode ser apagado pelo console do Firebase
     $("rank-clear").hidden = ON.ativo;
