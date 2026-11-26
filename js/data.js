@@ -64,7 +64,7 @@ CT.CONFIG = {
       titulo: "City Sunshine", autor: "Kevin MacLeod",
       volume: 0.2,
     },
-    festa: {   // Casa de Festas (área secreta): toca só lá dentro
+    festa: {   // Bia Festas (área secreta): toca só lá dentro
       arquivo: "assets/audio/festa.mp3",
       volume: 0.5,
     },
@@ -82,7 +82,7 @@ CT.CONFIG = {
   // O bônus começa em bonusRapidez.maximo e, depois de bonusRapidez.carencia
   // segundos, cai bonusRapidez.perdaPorSegundo pontos a cada segundo.
   pontosPorAcerto: 100,
-  // Bônus secreto da Casa de Festas (uma vez por partida): achar o CtrlDino e dançar com ele.
+  // Bônus secreto da Bia Festas (uma vez por partida): achar o CtrlDino e dançar com ele.
   // Se mudar estes valores, ajuste também o limite em firestore.rules.
   bonusDino: { achar: 150, dancar: 50 },
   bonusRapidez: { maximo: 100, carencia: 5, perdaPorSegundo: 3 },

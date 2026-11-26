@@ -540,7 +540,7 @@ window.CT = window.CT || {};
     }
 
     /* ---------- Lojas ---------- */
-    const SHOP_NAMES = [["Padaria", "#E2574C"], ["Farmácia", "#14A44D"], ["Café", "#7A4A22"], ["Livraria", "#1E6FD9"], ["Mercado", "#F07D1A"], ["Floricultura", "#B65CFF"], ["Ótica", "#2D3E8F"], ["Casa de Festas", "#E83E8C"]];
+    const SHOP_NAMES = [["Padaria", "#E2574C"], ["Farmácia", "#14A44D"], ["Café", "#7A4A22"], ["Livraria", "#1E6FD9"], ["Mercado", "#F07D1A"], ["Floricultura", "#B65CFF"], ["Ótica", "#2D3E8F"], ["Bia Festas", "#E83E8C"]];
     let shopI = 0;
     function buildShops(Q) {
       [[7.5, 9], [19.5, 9]].forEach(([u, w]) => {
@@ -555,7 +555,7 @@ window.CT = window.CT || {};
           const ss = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 1), new THREE.MeshBasicMaterial({ map: U.signTex(name, { w: 768, h: 160, bg: col, font: name.length > 10 ? 78 : 100, radius: 20 }) }));
           ss.position.set(cx, CURB + Math.min(kp.size.y * 0.36, 4.2), cz + dir0 * (kp.size.z / 2 + 0.12)); ss.rotation.y = ry; root.add(ss);
           W.colliders.addCentered(cx, cz, 9, 8.6, "shop");
-          if (name === "Casa de Festas") casaFestas(cx, cz, dir0, kp.size.z / 2);
+          if (name === "Bia Festas") casaFestas(cx, cz, dir0, kp.size.z / 2);
           if (name === "Café" || name === "Padaria") {
             [-2.5, 2.5].forEach((dx) => { inst(U.cyl(0.6, 0.6, 0.08, 12), U.mat("#FFFFFF"), cx + dx, CURB + 0.9, cz + dir0 * 6.2); inst(U.cyl(0.06, 0.06, 0.9, 6), U.mat("#555"), cx + dx, CURB + 0.45, cz + dir0 * 6.2); });
           }
@@ -577,7 +577,7 @@ window.CT = window.CT || {};
         const s = new THREE.Mesh(new THREE.PlaneGeometry(6, 1.3), new THREE.MeshBasicMaterial({ map: U.signTex(name, { w: 768, h: 160, bg: col, font: 100, radius: 20 }) }));
         s.position.set(cx, CURB + Math.min(H - 0.8, 4.4), cz + dir * 4.02); s.rotation.y = ry; root.add(s);
         W.colliders.addCentered(cx, cz, 9, 8, "shop");
-        if (name === "Casa de Festas") casaFestas(cx, cz, dir, 4);
+        if (name === "Bia Festas") casaFestas(cx, cz, dir, 4);
         // mesinhas na calçada
         if (name === "Café" || name === "Padaria") {
           [-2.5, 2.5].forEach((dx) => { inst(U.cyl(0.6, 0.6, 0.08, 12), U.mat("#FFFFFF"), cx + dx, CURB + 0.9, cz + dir * 5.9); inst(U.cyl(0.06, 0.06, 0.9, 6), U.mat("#555"), cx + dx, CURB + 0.45, cz + dir * 5.9); });
@@ -586,7 +586,7 @@ window.CT = window.CT || {};
       for (let i = 0; i < 3; i++) tree(Q.wx(5 + i * 8.5), Q.wz(21.5), 1 + rand() * 0.3);
     }
 
-    /* Casa de Festas: área secreta (sem anel, sem seta e sem missão). Guarda a
+    /* Bia Festas: área secreta (sem anel, sem seta e sem missão). Guarda a
      * porta para o jogo saber onde dá para entrar e põe dois cachos de balões
      * na fachada, a única pista de que ali tem festa. */
     function casaFestas(cx, cz, dir, half) {

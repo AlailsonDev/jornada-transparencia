@@ -25,7 +25,7 @@ window.CT = window.CT || {};
     score: 0, completed: [], firstTry: 0, bossDefeated: false, bossHits: 0, shake: 0,
     correct: 0, answered: false, playTime: 0, qTime: {}, startPhase: 0, over: false, // acertos, tempo e fim da partida
     unlocked: 0, statuses: [], current: -1, mapOpen: false, explore: false,
-    dino: { achou: false, dancou: false }, // bônus secreto da Casa de Festas (uma vez por partida)
+    dino: { achou: false, dancou: false }, // bônus secreto da Bia Festas (uma vez por partida)
   };
   const P = { x: 0, z: 0, y: 0, heading: 0, speed: 0, jy: 0, vy: 0 }; // jy/vy: altura e velocidade do pulo
   const cam = { pos: new THREE.Vector3(), look: new THREE.Vector3(), mode: "follow" };
@@ -208,7 +208,7 @@ window.CT = window.CT || {};
 
   function objectiveHTML() {
     if (G.bossDefeated) return "A cidade está totalmente liberada. Explore à vontade!";
-    if (G.festa) return "Você achou a <b>Casa de Festas</b>, uma área secreta! Dance com o dinossauro e saia pela <b>porta</b> quando quiser.";
+    if (G.festa) return "Você achou a <b>Bia Festas</b>, uma área secreta! Dance com o dinossauro e saia pela <b>porta</b> quando quiser.";
     if (G.scene === "interior" && G.current >= 0) {
       const d = CT.PREDIOS[G.current];
       return G.completed[G.current] ? `Desafio concluído! Volte à cidade pela <b>saída</b> (${K("ESPAÇO", "VOLTAR")} na porta).` : `Converse com <b>${d.npc.chamado || d.npc.nome}</b> ${d.npc.local || "no balcão"}.`;
@@ -474,7 +474,7 @@ window.CT = window.CT || {};
     world.buildings.forEach((b) => { const d = Math.hypot(P.x - b.trigger.x, P.z - b.trigger.z); if (d < bd) { bd = d; best = b; } });
     return best;
   }
-  // Casa de Festas: perto do dinossauro, ESPAÇO faz o personagem dançar junto
+  // Bia Festas: perto do dinossauro, ESPAÇO faz o personagem dançar junto
   function nearDino() {
     const room = interiors.current;
     if (!G.festa || !room || !room.festa) return false;
@@ -604,7 +604,7 @@ window.CT = window.CT || {};
     UI.toast(`${(room.def.npc.chamado || room.def.npc.nome).replace(/^./, (c) => c.toUpperCase())} está esperando por você ${room.def.npc.local || "no balcão"}.`, "", 3000);
   }
 
-  /* ---------------- Casa de Festas (área secreta, sem missão) ---------------- */
+  /* ---------------- Bia Festas (área secreta, sem missão) ---------------- */
   async function enterFesta() {
     const f = world.casaFestas;
     G.mode = "transition"; G.current = -1; G.festa = true;
@@ -1265,7 +1265,7 @@ window.CT = window.CT || {};
   function updatePrompts() {
     if (G.mode === "city") {
       if (nearLima()) return UI.prompt("PARA CONVERSAR COM SEU LIMA", "", "ESPAÇO");
-      if (nearFesta()) return UI.prompt("PARA ENTRAR NA CASA DE FESTAS", "", "ESPAÇO");
+      if (nearFesta()) return UI.prompt("PARA ENTRAR NA BIA FESTAS", "", "ESPAÇO");
       const b = nearestBuilding();
       if (b) {
         if (b.status === "available") return UI.prompt("PARA ENTRAR", "", "ESPAÇO");

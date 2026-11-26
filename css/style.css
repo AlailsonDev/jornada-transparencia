@@ -761,7 +761,7 @@ body.touch #prompt { white-space: normal; text-align: center; justify-content: c
   .phase-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* mensagem arqueada do CtrlDino (Casa de Festas) */
+/* mensagem arqueada do CtrlDino (Bia Festas) */
 #dino-banner { position: fixed; left: 50%; top: 9vh; z-index: 36; width: min(880px, 94vw); transform: translateX(-50%) scale(0.6); opacity: 0; pointer-events: none; text-align: center; transition: opacity 0.35s ease, transform 0.5s cubic-bezier(.2, 1.6, .4, 1); }
 #dino-banner.show { opacity: 1; transform: translateX(-50%) scale(1); }
 #dino-banner svg { width: 100%; height: auto; display: block; overflow: visible; }

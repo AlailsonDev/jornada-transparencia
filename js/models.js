@@ -597,7 +597,7 @@ window.CT_MODELOS_EMBUTIDOS = window.CT_MODELOS_EMBUTIDOS || {};
           if (m) aim(h, m, fd.clone().addScaledVector(UP, -0.15).normalize(), 1);
         });
       } else if (ch.sit) inner.position.y = 0;
-      // batendo palmas (plateia da Casa de Festas): braços à frente, as mãos se
+      // batendo palmas (plateia da Bia Festas): braços à frente, as mãos se
       // encontram no ritmo (ch.palmaBatida = segundos por palma) e o corpo balança
       if (ch.mode === "clap" && clapNativo) {
         ch._clapT = (ch._clapT || 0) + dt;
@@ -621,7 +621,7 @@ window.CT_MODELOS_EMBUTIDOS = window.CT_MODELOS_EMBUTIDOS || {};
         // rotação a cada quadro nos modelos cuja animação parada não mexe nesse osso
         inner.rotation.z = Math.sin(Math.PI * 2 * (ch._clapT / (per * 4))) * 0.05;
       } else if (ch._clapT) { inner.rotation.z = 0; ch._clapT = 0; }
-      // dançando como o dinossauro da Casa de Festas: pulinhos no ritmo, corpo balançando,
+      // dançando como o dinossauro da Bia Festas: pulinhos no ritmo, corpo balançando,
       // passinhos com uma perna de cada vez, bracinhos de tiranossauro sacudindo e, a cada
       // 16 batidas, uma voltinha completa. ch.dancaTempo() dá o relógio da festa (assim todos
       // dançam juntos) e ch.dancaBatida, os segundos por batida.

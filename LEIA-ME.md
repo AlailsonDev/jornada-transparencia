@@ -262,9 +262,9 @@ O prédio 1 (Portal da Transparência) é um modelo da sede da Prefeitura do Jab
 - **Gestos sem acúmulo:** os ossos mexidos por código (cabeça, tronco, braços, mãos e pernas) voltam à pose de repouso antes de cada quadro. Antes, nos homens (modelo Worker, cujo "parado" não anima a cabeça), o "não" com a cabeça se somava a cada quadro e a cabeça girava para posições impossíveis.
 - **Aceno:** a mão fica aberta com a palma para a frente também nos modelos sem ossos de dedos (o Worker).
 
-## Área secreta: a Casa de Festas
+## Área secreta: a Bia Festas
 
-Uma das lojas da cidade (no lugar da antiga "Papelaria") é a **Casa de Festas**: dá para entrar, mas ela não tem missão, por isso não tem o anel de chegada nem a seta apontando para ela. A única pista são os cachos de balões na fachada; quem chega à porta vê "PRESSIONE ESPAÇO PARA ENTRAR NA CASA DE FESTAS".
+Uma das lojas da cidade (no lugar da antiga "Papelaria") é a **Bia Festas**: dá para entrar, mas ela não tem missão, por isso não tem o anel de chegada nem a seta apontando para ela. A única pista são os cachos de balões na fachada; quem chega à porta vê "PRESSIONE ESPAÇO PARA ENTRAR NA BIA FESTAS".
 
 - **O salão** (`js/casa-festas.js`):
   - pista de dança 7×7 com ladrilhos que acendem no ritmo da música;

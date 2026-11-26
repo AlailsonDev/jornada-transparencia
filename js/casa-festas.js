@@ -1,6 +1,6 @@
 /* =====================================================================
- * CASA DE FESTAS — área secreta (sem missão, sem anel e sem seta).
- * Uma das lojas da cidade é a "Casa de Festas"; quem chega à porta e
+ * BIA FESTAS — área secreta (sem missão, sem anel e sem seta).
+ * Uma das lojas da cidade é a "Bia Festas"; quem chega à porta e
  * aperta ESPAÇO entra num salão de festa com pista de dança iluminada,
  * globo espelhado, bandeirinhas, balões, mesa com bolo, caixas de som,
  * confete caindo e... uma pessoa fantasiada de tiranossauro rex (fantasia
@@ -245,7 +245,7 @@ window.CT = window.CT || {};
     // balões ao lado da porta
     [-1, 1].forEach((s) => { for (let i = 0; i < 4; i++) { const b = new THREE.Mesh(U.geo("festa-balao-porta", () => { const g = new THREE.SphereGeometry(0.26, 14, 10); g.scale(1, 1.18, 1); return g; }), U.mat(CORES[(i + (s > 0 ? 2 : 0)) % CORES.length], { roughness: 0.25 })); b.position.set(s * (DW / 2 + 0.55 + (i % 2) * 0.35), DH - 0.3 + Math.floor(i / 2) * 0.5, RD - 0.3); group.add(b); } });
     // letreiro no fundo
-    const name = new THREE.Mesh(new THREE.PlaneGeometry(8.4, 1.8), new THREE.MeshBasicMaterial({ map: U.signTex("Casa de Festas", { w: 1024, h: 220, bg: "#E83E8C", fg: "#FFFFFF", font: 120, radius: 40 }), transparent: true }));
+    const name = new THREE.Mesh(new THREE.PlaneGeometry(8.4, 1.8), new THREE.MeshBasicMaterial({ map: U.signTex("Bia Festas", { w: 1024, h: 220, bg: "#E83E8C", fg: "#FFFFFF", font: 120, radius: 40 }), transparent: true }));
     name.position.set(0, 5.9, -RD + 0.03); group.add(name);
     // lâmpadas em volta do letreiro (piscam)
     const bulbs = [];
@@ -434,7 +434,7 @@ window.CT = window.CT || {};
 
     return {
       group, colliders: col, anim, npc, festa: true,
-      def: { nome: "Casa de Festas", cor: "#E83E8C" },
+      def: { nome: "Bia Festas", cor: "#E83E8C" },
       bounds: { x0: -RW + 0.6, x1: RW - 0.6, z0: -RD + 0.6, z1: RD - 1.8 },   // a câmera fica do lado de dentro da parede da porta
       spawn: { x: 0, z: 5.2, heading: Math.PI },
       talk: { x: 0, z: -999, r: 0 },            // ninguém para conversar: é só festa!

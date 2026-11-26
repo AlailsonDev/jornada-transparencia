@@ -40,7 +40,7 @@ window.CT = window.CT || {};
       api.current = current;
       return current;
     };
-    /* Casa de Festas (área secreta): salão montado em js/casa-festas.js */
+    /* Bia Festas (área secreta): salão montado em js/casa-festas.js */
     api.enterFesta = function () {
       if (current) scene.remove(current.group);
       hemi.intensity = 0.42; key.intensity = 0.55; fill.intensity = 0.25;   // luz de festa: mais baixa, as cores aparecem
