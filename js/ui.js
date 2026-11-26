@@ -33,7 +33,6 @@ window.CT = window.CT || {};
     // textos da tela inicial vindos de data.js
     $("title-logos").innerHTML = UI.supportLogos();
     $("title-lead").textContent = CT.CONFIG.chamada;
-    $("title-foot").innerHTML = `${esc(CT.CONFIG.evento)} · <b>${esc(CT.CONFIG.dataEvento)}</b>`;
     // créditos
     const dd = (v) => Array.isArray(v) ? `<ul>${v.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : esc(v);
     $("credits-body").innerHTML =
@@ -607,7 +606,7 @@ window.CT = window.CT || {};
         ${tipo === "vitoria" && h.explore ? '<button class="btn-ghost" id="btn-explore">CONTINUAR EXPLORANDO</button>' : ""}
         <button class="btn-ghost" id="btn-home">TELA INICIAL</button>
       </div>
-      <div class="victory-org"><div class="victory-logos">${UI.supportLogos() || UI.emblem()}</div><span>${esc(CT.CONFIG.evento)} · ${esc(CT.CONFIG.dataEvento)}</span></div>
+      <div class="victory-org"><div class="victory-logos">${UI.supportLogos() || UI.emblem()}</div><span>${esc(CT.CONFIG.evento)}</span></div>
     </div>`;
     v.hidden = false; v.scrollTop = 0;
     const input = $("rank-name");

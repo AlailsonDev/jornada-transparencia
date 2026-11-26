@@ -101,13 +101,6 @@ button:focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
 .music-chip[aria-pressed="false"] .music-bars i { background: var(--ink-soft); }
 @media (prefers-reduced-motion: reduce) { .music-chip.playing .music-bars i { animation: none; height: 70%; } }
 .logo-sep { width: 1px; align-self: stretch; background: #D9DFEA; }
-.title-kicker {
-  align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 10px;
-  border-radius: 999px; background: rgba(255, 176, 32, 0.14); border: 1px solid rgba(255, 176, 32, 0.4);
-  font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; color: #FFE2A6; text-transform: uppercase;
-}
-.title-kicker::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 4px rgba(255, 176, 32, 0.25); }
-.title-kicker b { color: var(--amber); }
 /* título: imagem (assets/logos/titulo.*) com fundo transparente; encolhe pela largura e pela altura da tela */
 .game-title { margin: 0; line-height: 0; }
 .game-title picture { display: block; }
@@ -689,16 +682,15 @@ body.touch #prompt { white-space: normal; text-align: center; justify-content: c
   #title-screen { grid-template-columns: minmax(0, 1fr); padding: 52px max(20px, env(safe-area-inset-right, 0px)) 14px max(20px, env(safe-area-inset-left, 0px)); }
   .title-card { max-width: 920px; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(230px, 320px); column-gap: clamp(20px, 4vw, 48px); row-gap: 10px; align-items: center; }
   .title-card > * { grid-column: 1; }
-  .title-kicker { grid-row: 1; justify-self: start; font-size: 0.66rem; padding: 4px 10px 4px 8px; white-space: nowrap; max-width: 100%; }
-  .game-title { grid-row: 2; }
+  .game-title { grid-row: 1; }
   .game-title img { max-height: 34vh; max-height: 34dvh; }
-  .title-lead { grid-row: 3; font-size: 0.9rem; line-height: 1.45; }
-  .title-logos { grid-row: 4; justify-self: start; padding: 6px 10px; gap: 8px; } /* só a largura dos logos */
+  .title-lead { grid-row: 2; font-size: 0.9rem; line-height: 1.45; }
+  .title-logos { grid-row: 3; justify-self: start; padding: 6px 10px; gap: 8px; } /* só a largura dos logos */
   .title-logos img { height: 20px; }
   .title-logos img.logo-cgm { height: 17px; }
   .title-logos img.logo-ctrl-lab { height: 24px; }
-  .title-menu { grid-column: 2; grid-row: 1 / span 4; margin: 0; width: 100%; }
-  .menu-hint { grid-column: 2; grid-row: 5; }
+  .title-menu { grid-column: 2; grid-row: 1 / span 3; margin: 0; width: 100%; }
+  .menu-hint { grid-column: 2; grid-row: 4; }
   .music-chip { top: max(10px, env(safe-area-inset-top, 0px)); padding: 6px 12px; }
   .music-chip .music-text { display: none; }
   .music-chip .music-state { padding-left: 0; border-left: 0; }

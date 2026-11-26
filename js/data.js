@@ -27,7 +27,6 @@ CT.CONFIG = {
   orgao: "Controladoria Geral do Município",
   orgaoSigla: "CGM",
   evento: "Dia da Transparência",
-  dataEvento: "18 de novembro",
 
   // Logotipo oficial (opcional). Ex.: "assets/logo-cgm.png".
   // Se ficar vazio, o jogo usa o emblema padrão desenhado em código.
